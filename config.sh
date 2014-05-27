@@ -10,3 +10,9 @@ sudo npm install socket.io
 sudo npm install mysql
 
 sudo apt-get install mysql-server
+
+#install shell terminal
+cd /home/hduser/PigDebugger/shellinabox-2.14
+./configure
+sudo make
+sudo make install
