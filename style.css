@@ -1,0 +1,337 @@
+#title{
+	position: absolute;
+	left: 10%;
+}
+
+#date
+{
+	position: absolute;
+	left: 89%;
+	top:2%;
+}
+
+#pigicon
+{
+	position: absolute;
+	width: 3%;
+	height: 5%;
+	top:2%;
+	left: 6%;
+}
+
+#navtab
+{
+	position:absolute;
+	top:9%;
+	left: 2%;
+}
+
+/**************************************scripts zone ***************************************/
+#scriptZone
+{
+	position:absolute;
+	top: 20%;
+	left: 1%;
+	width: 28%;
+	height: 62%;
+}
+
+#searchform
+{
+	position:absolute;
+	top: 2%;
+	width: 88%;
+	height: 30%;
+}
+
+#search
+{
+	height: 21%;
+	width: 128%;
+}
+
+#turnpage
+{
+	position:absolute;
+	left: 60%;
+	top: 6%;
+}
+
+#scriptFiles
+{
+	position:absolute;
+	top:17%;
+	width: 100%;
+	
+}
+
+/******************************************pig helper******************************************/
+#helper
+{
+	position: absolute;
+	top:15%;
+	left:33%;
+}
+
+/*******************************************script input zone***********************************/
+#input{
+	position:absolute;
+	top:20%;
+	left:33%;
+	width:63%;
+	height: 62%;
+}
+
+#scriptName
+{
+	position: absolute;
+	top: 2%;
+	left: 2%;
+}
+
+#scriptNameInput
+{
+	position: absolute;
+	top: 2%;
+	left: 2%;
+	height:6%;
+	width: 23%;
+}
+
+#createScriptButton
+{
+	position: absolute;
+	top: 2%;
+	left: 28%;
+	width: 10%;
+	height:6%;
+}
+
+#saveScriptButton
+{
+	position: absolute;
+	top: 2%;
+	left: 40%;
+	width: 11%;
+	height:6%;
+}
+
+#resetinputarea
+{
+	position: absolute;
+	top: 2%;
+	left: 53%;
+	width: 16%;
+	height:6%;
+}
+
+.linedwrap
+{
+	position:absolute;
+	left:0%;
+	top:8%;
+	width:97%;
+	height:82%;
+	padding: 5px;
+}
+
+.linedwrap .lines
+{
+	position:absolute;
+	top:2%;
+	width: 3%;
+}
+
+#scriptinputarea
+{
+	position:absolute;
+	left:3.6%;
+	top:2%;
+	width: 97%;
+	height: 99%; 
+	
+}
+
+#progressBar
+{
+	position:absolute;
+	width:98%;
+	top:94%;
+	left:1%;
+}
+
+
+
+/***********************************************buttongroup****************************************/
+#buttongroup
+{
+	position: absolute;
+	top:90%;
+	left:2%;
+	width: 96%;
+}
+
+#downloadOutputButton
+{
+	position: absolute;
+	top:0%;
+	left:0%;
+	width:14%;
+}
+
+#downloadProgressLogButton
+{
+	position: absolute;
+	top:0%;
+	left:15%;
+	width:17%;
+}
+
+#executeButton
+{
+	position: absolute;
+	top:0%;
+	left:33%;
+	width:9%;
+}
+
+#killButton
+{
+	position: absolute;
+	top:0%;
+	left:43%;
+	width:6%;
+}
+
+#explainButton
+{
+	position: absolute;
+	top:0%;
+	left:50%;
+	width:8%;
+}
+
+#logButton
+{
+	position: absolute;
+	top:0%;
+	left:71%;
+	width:15%;
+}
+
+#outputButton
+{
+	position: absolute;
+	top:0%;
+	left:59%;
+	width:11%;
+}
+
+#success
+{
+	position: absolute;
+	font-size: 18px;
+	top:90.5%;
+	left:91%;
+	width:5.7%;
+	height: 2.2%;
+	text-align:center;
+}
+
+
+
+
+/*********************************************log zone***********************************************/
+#logcontainer{
+	position:absolute;
+	top: 96%;
+	left: 2%;
+	width: 93%;
+}
+
+#result{
+	position:relative;
+	display: none;
+	top: 0%;
+	left: 0%;
+	width: 100%;
+	height:100%;
+}
+
+#progressLog
+{
+	position:relative;
+	display: none;
+	top: 0%;
+	left: 0%;
+	width: 100%;
+}
+
+#resultarea{
+	position:relative;
+	width: 100%;
+	height: 85%;
+	overflow:scroll;
+}
+
+#foot{
+	height: 10%;
+	top:0%;
+	position:relative;
+	text-align:center;
+}
+
+#terminalfoot
+{
+	position: absolute;
+	top:95%;
+	width: 100%;
+	text-align:center;
+}
+
+iframe
+{
+	position: absolute;
+	width: 98%;
+	height: 75%;
+	top: 17%;
+	left: 1%;
+}
+
+#history
+{
+	position: absolute;
+	width: 95%;
+	height: 70%;
+	top: 17%;
+	left: 1%;
+}
+
+#historypager
+{
+	position: relative;
+	top:0%;
+	left: 85%;
+	width: 11%;
+}
+
+#progressBarBackup
+{
+	position: fixed;
+	left:65%;
+	bottom:0px;
+	width: 33%;
+	display: none;
+}
+
+#outputlabel{
+	font-style:normal;
+	position:relative;
+	left:47%;
+	width: 5%;
+}
+
+
+
+
+
