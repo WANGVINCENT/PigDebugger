@@ -66,12 +66,48 @@
 }
 
 /******************************************pig helper******************************************/
-#helper
+#tip
 {
 	position: absolute;
-	top:15%;
+	top:16%;
+	left:2%;
+}
+
+#parameter
+{
+	position: absolute;
+	top:14.5%;
 	left:33%;
 }
+
+#helper
+{
+	position: relative;
+	top:0%;
+	left:0%;
+}
+
+#mode
+{
+	position: relative;
+	top:0%;
+	left:2%;
+}
+
+#hadoopdirdiv
+{
+	position: absolute;
+	top:0%;
+	left:110%;
+	display: inline;
+}
+
+#hadoopdir
+{
+	height: 6%;
+}
+
+
 
 /*******************************************script input zone***********************************/
 #input{
@@ -95,7 +131,7 @@
 	top: 2%;
 	left: 2%;
 	height:6%;
-	width: 23%;
+	width: 24%;
 }
 
 #createScriptButton
