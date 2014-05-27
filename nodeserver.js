@@ -135,7 +135,7 @@ var io = require('socket.io').listen(httpServer);
 io.sockets.on('connection', function (socket) {
 	
 	var openTerminal = 'shellinaboxd --port=5678 --css=\'' + __dirname + '/shellinabox-2.14/shellinabox/white-on-black.css\'';
-	exec = process.exec(openTerminal, puts);
+	process.exec(openTerminal, puts);
 
 	//Get pig script names in 'scripts' directory
 	var scripts = fs.readdirSync(__dirname+'/scripts/');
@@ -168,23 +168,29 @@ io.sockets.on('connection', function (socket) {
     //execute pig script
     socket.on('execute', function(data){
     	httpSocket = socket;
-    	var executionString = 'java -Xmx2048m -Xms256m -cp ' + __dirname;
+
+    	var executionString = '';
+    	//executionString = 'java -Xmx2048m -Xms256m -cp ' + __dirname + '/bin';
+    	executionString = 'java -Xmx512m -Xms256m -cp ' + __dirname + '/bin';
     	executionString += ':' + __dirname + '/bin/hibernate/*';
-    	executionString += ':$HADOOPDIR';
-    	executionString += ' ' + __dirname + '/bin/Main mapreduce'; 
-    	//executionString += data.mode + ' ';
+    	if(data.mode == 'mapreduce'){
+    		executionString += ':$HADOOPDIR';
+    	}
+    	executionString += ' Main'; 
+    	executionString += ' ' + data.mode;
     	executionString += ' ' + __dirname + '/scripts/' + data.name + '.pig ';
     	executionString += host + ' ';
     	executionString += tcpPort + ' ';
     	executionString += 'script';
     	
+    	exec = process.exec(executionString, puts);
     	console.log(executionString);
-		//exec = process.exec(executionString, puts);
     });
 
     //kill pig process
     socket.on('kill', function(data){
-    	exec.kill('SIGHUP');
+    	var pid = exec.pid + 1
+		process.exec('kill -9 ' + pid);
     });
 
     socket.on('downloadOutput', function(data){
@@ -213,9 +219,8 @@ function puts(error, stdout, stderr)
 
 function getOutput(socket, historycurrentPage){
 	var start = (parseInt(historycurrentPage) - 1) * 10;
-	var end = (parseInt(historycurrentPage) - 1) * 10 + 10;
 	 
-	var query = 'SELECT id, name, script_uuid, time, state FROM output ORDER BY id DESC LIMIT ' + start + ',' + end + ';SELECT COUNT(*) AS number FROM output;'; 
+	var query = 'SELECT id, name, script_uuid, time, state FROM output ORDER BY id DESC LIMIT 10 OFFSET ' + start + ';SELECT COUNT(*) AS number FROM output;'; 
 	pool.getConnection(function(err, connection){
   		connection.query(query, function(err, rows){
 		  	if(err) {

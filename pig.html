@@ -35,13 +35,31 @@
 	   			</table>
 	   		</div>
 
-	   		<div id="helper" class="btn-group">
-				<a class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-				    Pig Helper
-				    <span class="caret"></span>
-				</a>
-				<ul id="pighelper" class="dropdown-menu">
-				</ul>
+	   		<a style="cursor: pointer;" id="tip" data-toggle="tooltip" data-placement="bottom">Do you know?</a>
+	   		<div id="parameter">
+		   		<div id="helper" class="btn-group">
+					<a class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+					    Pig Helper
+					    <span class="caret"></span>
+					</a>
+					<ul id="pighelper" class="dropdown-menu">
+					</ul>
+				</div>
+
+				<div id="mode" class="btn-group">
+					<a id="ModeText" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+					    Mode
+					    <span class="caret"></span>
+					</a>
+					<ul id="modeSelector" class="dropdown-menu">
+						<li><a tabindex="-1" onclick="setMode(this.innerHTML)">local</a></li>
+						<li><a tabindex="-1" onclick="setMode(this.innerHTML)">mapreduce</a></li>
+					</ul>
+				</div>
+
+				<div id="hadoopdirdiv">
+					<input id="hadoopdir" type="text" placeholder="Hadoop Dir" />
+				</div>
 			</div>
 			
 			<div class="container well" id="input">
@@ -116,6 +134,11 @@
 
 				$('#scriptinputarea').linedtextarea({selectedLine: 1});
 				showPigHelper();
+
+				var tiptitle = 'Press shift : autocompletion;\n Pig';
+
+				$('#tip').attr('title', tiptitle);
+				$('#tip').tooltip();
 			});
 
 	        var pighelper = {
@@ -238,6 +261,8 @@
 			var jobsNumber;
 			var jobsCount = 0;
 			var currentScriptUUID;
+			var mode;
+			var kill = false;
 			function coordinate(data){
 		        if(data.notification == 'fail'){
 	        		$('#success').attr('class','label label-important');
@@ -279,6 +304,9 @@
 					$('#progressionBackup').html('100%');
 					string += '<tr>';
 			        string += '<td>Total duration: ' + parseFloat(data.duration/1000) + ' seconds' + '</td>';
+			        if(mode == 'mapreduce'){
+			        	string += '<td></td><td></td>';
+			        }
 			        string += '</tr>';
 			        $('#stateLog').html(string);
 					$('#resultarea').html(output);
@@ -314,49 +342,69 @@
 					currentJobId = data.jobid;
 
 					string += '<tr>';
-			        string += '<td>' + data.operation + '</td><td style="width:18%;"><div class="progress progress-info progress-striped active"><div id="map_' + data.jobid + '" class="bar" style="width:0%;font-style:normal;font-size:100%;">Map 0%</div></div></td><td style="width:18%;"><div class="progress progress-warning progress-striped active"><div id="reduce_' + data.jobid + '" class="bar" style="width:0%;font-style:normal;font-size:100%;">Reduce 0%</div></div></td>';
+			        string += '<td>' + data.operation + '</td>';
+			        if(data.mode == 'mapreduce'){
+			        	string += '<td style="width:22%;"><div class="progress progress-info progress-striped active"><div id="map_' + data.jobid + '" class="bar" style="width:0%;font-style:normal;font-size:100%;">Map 0%</div></div></td><td style="width:22%;"><div class="progress progress-warning progress-striped active"><div id="reduce_' + data.jobid + '" class="bar" style="width:0%;font-style:normal;font-size:100%;">Reduce 0%</div></div></td>';
+			        }
 			        string += '</tr>';
 			        $('#stateLog').html(string);
 
-					var delay = 1000;
-				    setTimeout(function(){
-				        $('#map_'+data.jobid).css('width', '25%');
-				        $('#map_'+data.jobid).html('Map 25%');
-				        //$('#stateLog').html(string);
-				        for(var i in mapreduceprogressRecord){
-							$('#map_' + mapreduceprogressRecord[i]).css('width', '100%');
-							$('#reduce_' + mapreduceprogressRecord[i]).css('width', '100%');
-							$('#map_' + mapreduceprogressRecord[i]).html('Map 100%');
-							$('#reduce_' + mapreduceprogressRecord[i]).html('Reduce 100%');
-						}
-				    }, delay); 
-
+			        if(data.mode == 'mapreduce'){
+			        	var delay = 1000;
+					    setTimeout(function(){
+					        $('#map_'+data.jobid).css('width', '25%');
+					        $('#map_'+data.jobid).html('Map 25%');
+					        //$('#stateLog').html(string);
+					        for(var i in mapreduceprogressRecord){
+								$('#map_' + mapreduceprogressRecord[i]).css('width', '100%');
+								$('#reduce_' + mapreduceprogressRecord[i]).css('width', '100%');
+								$('#map_' + mapreduceprogressRecord[i]).html('Map 100%');
+								$('#reduce_' + mapreduceprogressRecord[i]).html('Reduce 100%');
+							}
+					    }, delay); 
+			        }
+					
 				}else if(data.notification == 'jobfinish'){
-					if($('#reduce_'+data.jobid).css('width') != '100%'){
-						$('#reduce_'+data.jobid).css('width','100%');
-						$('#reduce_'+data.jobid).html('Reduce 100%');
+
+					if(data.mode == 'mapreduce'){
+						if($('#reduce_'+data.jobid).css('width') != '100%'){
+							$('#reduce_'+data.jobid).css('width','100%');
+							$('#reduce_'+data.jobid).html('Reduce 100%');
+						}
+						if(mapreduceprogressRecord.indexOf(data.jobid) < 0){
+							mapreduceprogressRecord.push(data.jobid);
+						}
 					}
-					if(mapreduceprogressRecord.indexOf(data.jobid) < 0){
-						mapreduceprogressRecord.push(data.jobid);
-					}
+					
 					
 					//if it is the last job, remove delay function
 					if(jobsCount == jobsNumber){
 						string += '<tr>';
-				        string += '<td>' + data.operation + '</td><td style="text-align:center;">' + data.mapNumber + ' maps : ' + parseFloat(data.maptime/1000)  + ' s</td><td style="text-align:center;">' + data.reduceNumber + ' reduces : ' + parseFloat(data.reducetime/1000) + ' s</td>';
+				        string += '<td>' + data.operation + '</td>';
+				        if(data.mode == 'mapreduce'){
+				        	string += '<td style="text-align:center;">' + data.mapNumber + ' maps : ' + parseFloat(data.maptime/1000)  + ' s</td><td style="text-align:center;">' + data.reduceNumber + ' reduces : ' + parseFloat(data.reducetime/1000) + ' s</td>';
+				        }
+				        
 				        string += '</tr>';
 				        $('#stateLog').html(string);
-				        for(var i in mapreduceprogressRecord){
-							$('#map_' + mapreduceprogressRecord[i]).css('width', '100%');
-							$('#reduce_' + mapreduceprogressRecord[i]).css('width', '100%');
-							$('#map_' + mapreduceprogressRecord[i]).html('Map 100%');
-							$('#reduce_' + mapreduceprogressRecord[i]).html('Reduce 100%');
-						}
+				        if(data.mode == 'mapreduce') {
+				        	 for(var i in mapreduceprogressRecord){
+								$('#map_' + mapreduceprogressRecord[i]).css('width', '100%');
+								$('#reduce_' + mapreduceprogressRecord[i]).css('width', '100%');
+								$('#map_' + mapreduceprogressRecord[i]).html('Map 100%');
+								$('#reduce_' + mapreduceprogressRecord[i]).html('Reduce 100%');
+							}
+				        }
+				       
 					}else{
 						var delay = 500;
 					    setTimeout(function(){
 							string += '<tr>';
-					        string += '<td>' + data.operation + '</td><td style="text-align:center;">' + data.mapNumber + ' maps : ' + parseFloat(data.maptime/1000)  + ' s</td><td style="text-align:center;">' + data.reduceNumber + ' reduces : ' + parseFloat(data.reducetime/1000) + ' s</td>';
+					        string += '<td>' + data.operation + '</td>';
+					        if(data.mode == 'mapreduce'){
+					        	string += '<td style="text-align:center;">' + data.mapNumber + ' maps : ' + parseFloat(data.maptime/1000)  + ' s</td><td style="text-align:center;">' + data.reduceNumber + ' reduces : ' + parseFloat(data.reducetime/1000) + ' s</td>';
+					        }
+
 					        string += '</tr>';
 					        $('#stateLog').html(string);
 					        for(var i in mapreduceprogressRecord){
@@ -370,25 +418,46 @@
 					
 				}else if(data.notification == 'start'){
 					currentScriptUUID = data.uuid;
-
+					
 					jobsNumber = parseInt(data.jobsNumber);
 					string += '<tr>';
-			        string += '<td>' + data.operation + '</td><td></td><td></td>';
+			        string += '<td>' + data.operation + '</td>';
+			        if(data.mode == 'mapreduce'){
+			        	string += '<td></td><td></td>';
+			        }
+			        
 			        string += '</tr>';
 			        $('#stateLog').html(string);
 				}
-				else{
+				else if(data.notification == 'launch'){
 					string += '<tr>';
-			        string += '<td>' + data.operation + '</td><td></td><td></td>';
+			        string += '<td>' + data.operation + '</td>';
+			        mode = data.mode;
+
+			        if(data.mode == 'mapreduce'){
+			        	string += '<td></td><td></td>';
+			        }
+			       
+			        string += '</tr>';
+			        $('#stateLog').html(string);
+				} else{
+					string += '<tr>';
+			        string += '<td>' + data.operation + '</td>';
+			        if(mode == 'mapreduce'){
+			        	string += '<td></td><td></td>';
+			        }
+			       
 			        string += '</tr>';
 			        $('#stateLog').html(string);
 				}
 				
-				for(var i in mapreduceprogressRecord){
+				if(mode == 'mapreduce'){
+					for(var i in mapreduceprogressRecord){
 					$('#map_' + mapreduceprogressRecord[i]).css('width', '100%');
 					$('#reduce_' + mapreduceprogressRecord[i]).css('width', '100%');
 					$('#map_' + mapreduceprogressRecord[i]).html('Map 100%');
 					$('#reduce_' + mapreduceprogressRecord[i]).html('Reduce 100%');
+					}
 				}
 			}
 
@@ -399,7 +468,9 @@
 	        	for(var i in notifications){
 	        	 	if(i != notifications.length - 1){
 	        	 		var tcpData = JSON.parse(notifications[i]);
-	        	 		coordinate(tcpData);
+	        	 		if(!kill){
+	        	 			coordinate(tcpData);
+	        	 		}
 	        	 	}
 	        	}
 	       	});
@@ -537,6 +608,10 @@
 			var selectedScript = '';
 			function selectScript(name){
 				reset();
+				kill = false;
+
+				$('#ModeText').html('Mode <span class="caret"></span>');
+
 				if(selectedScript != ''){
 					$('#'+selectedScript).attr('class','btn btn-warning');
 					$('#'+selectedScript).html('<i class="icon-file icon-white"></i>');
@@ -551,17 +626,27 @@
 			//execute script
 			function executeScript(){
 				reset();
-				var data = {'name': selectedScript,
-							'mode': $('#modebutton').html()
-						   }
-		
-				socket.emit('execute', data);
+				kill = false;
+
+				var mode = $('#ModeText').text().trim();
+				if(selectedScript == ''){
+					alert('No script selected!');
+				}else if(mode == 'Mode'){
+					alert('No mode selected!');
+				}else{
+					var data = {'name': selectedScript,
+								'mode': $('#ModeText').text().trim()
+						   	   }
+					
+					socket.emit('execute', data);
+				}
 			}
 
 			//kill script
 			function killScript(){
+				kill = true;
+				socket.emit('kill', 'kill');
 				reset();
-				socket.emit('kill', selectedScript);
 			}
 
 			function reset(){
@@ -575,7 +660,9 @@
 				$('#success').html('State');
 				$('#success').attr('class','label label-default');
 				$('#resultarea').html('');
+				output = '';
 				string = '';
+				mapreduceprogressRecord = [];
 			}
 
 
@@ -719,6 +806,10 @@
 				$('#navtab').children().removeClass('active');
 				$(node).parent().addClass('active');
 				socket.emit('tab','history');
+			}
+
+			function setMode(mode){
+				$('#ModeText').html(mode + ' <span class="caret"></span>');
 			}
 
 		</script>
