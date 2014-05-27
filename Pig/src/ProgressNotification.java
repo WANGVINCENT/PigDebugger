@@ -99,6 +99,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject.put("uuid", uuid);
 			jsonObject.put("operation", operation);
 			jsonObject.put("mode", mode);
+			jsonObject.put("plan", plan.toString());
 			client.addMessage(jsonObject.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
