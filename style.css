@@ -32,7 +32,7 @@
 	position:absolute;
 	top: 20%;
 	left: 1%;
-	width: 28%;
+	width: 26%;
 	height: 62%;
 }
 
@@ -62,7 +62,8 @@
 	position:absolute;
 	top:17%;
 	width: 100%;
-	
+	left: 5%;
+	font-size: 10pt;
 }
 
 /******************************************pig helper******************************************/
@@ -70,7 +71,7 @@
 {
 	position: absolute;
 	top:16%;
-	left:2%;
+	left:22%;
 }
 
 #parameter
@@ -84,21 +85,21 @@
 {
 	position: relative;
 	top:0%;
-	left:0%;
+	left:-13%;
 }
 
 #mode
 {
 	position: relative;
 	top:0%;
-	left:2%;
+	left:-10%;
 }
 
 #hadoopdirdiv
 {
 	position: absolute;
 	top:0%;
-	left:110%;
+	left:100%;
 	display: inline;
 }
 
@@ -113,8 +114,8 @@
 #input{
 	position:absolute;
 	top:20%;
-	left:33%;
-	width:63%;
+	left:31%;
+	width:65%;
 	height: 62%;
 }
 
@@ -178,6 +179,7 @@
 	width: 3%;
 }
 
+
 #scriptinputarea
 {
 	position:absolute;
@@ -185,7 +187,15 @@
 	top:2%;
 	width: 97%;
 	height: 99%; 
-	
+	overflow-y: scroll;
+}
+
+.cm-s-default 
+{
+	position:relative;
+	left: -2.4%;
+	top:6%;
+	height: 110%;
 }
 
 #progressBar
@@ -281,8 +291,8 @@
 #logcontainer{
 	position:absolute;
 	top: 96%;
-	left: 2%;
-	width: 93%;
+	left: 1%;
+	width: 95%;
 }
 
 #result{

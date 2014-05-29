@@ -59,13 +59,13 @@
 #define HAVE_OPENPTY 1
 
 /* Define to 1 if you have the <openssl/bio.h> header file. */
-#define HAVE_OPENSSL_BIO_H 1
+/* #undef HAVE_OPENSSL_BIO_H */
 
 /* Define to 1 if you have the <openssl/err.h> header file. */
-#define HAVE_OPENSSL_ERR_H 1
+/* #undef HAVE_OPENSSL_ERR_H */
 
 /* Define to 1 if you have the <openssl/ssl.h> header file. */
-#define HAVE_OPENSSL_SSL_H 1
+/* #undef HAVE_OPENSSL_SSL_H */
 
 /* Define to 1 if you have the <pthread.h> header file. */
 #define HAVE_PTHREAD_H 1
@@ -143,7 +143,7 @@
 #define HAVE_UTMP_H 1
 
 /* Define to 1 if zlib development files are installed */
-#define HAVE_ZLIB 1
+/* #undef HAVE_ZLIB */
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */

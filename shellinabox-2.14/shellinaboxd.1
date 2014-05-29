@@ -51,7 +51,6 @@ shellinaboxd \- publish command line shell through AJAX interface
 .TP
 .B shellinaboxd
 [\ \fB-b\fP\ | \fB--background\fP[\fB=\fP\fIpidfile\fP]\ ]
-[\ \fB-c\fP\ | \fB--cert=\fP\fIcertdir\fP\ ]
 [\ \fB--cert-fd=\fP\fIfd\fP\ ]
 [\ \fB--css=\fP\fIfilename\fP\ ]
 [\ \fB--cgi\fP[\fB=\fP\fIportrange\fP]\ ]
@@ -66,7 +65,6 @@ shellinaboxd \- publish command line shell through AJAX interface
 [\ \fB--pidfile=\fP\fIpidfile\fP\ ]
 [\ \fB-p\fP\ | \fB--port=\fP\fIport\fP\ ]
 [\ \fB-s\fP\ | \fB--service=\fP\fIservice\fP\ ]
-[\ \fB-t\fP\ | \fB--disable-ssl\fP\ ]
 [\ \fB--disable-ssl-menu\fP\ ]
 [\ \fB-q\fP\ | \fB--quiet\fP\ ]
 [\ \fB-u\fP\ | \fB--user=\fP\fIuid\fP\ ]
@@ -103,57 +101,6 @@ Launch
 .B shellinaboxd
 as a background daemon process. Optionally, write the process id to
 .IR pidfile .
-.TP
-\fB-c\fP\ |\ \fB--cert=\fP\fIcertdir\fP
-If built with SSL/TLS support enabled, the daemon will look in
-.I certdir
-for any certificates. If unspecified, this defaults to the current
-working directory.
-
-If the browser negotiated a
-.B Server Name Identification
-the daemon will look for a matching
-.I certificate-\f[BI]SERVERNAME\fP.pem
-file. This allows for virtual hosting of multiple server names on the
-same IP address and port.
-
-If no
-.B SNI
-handshake took place, it falls back on using the certificate in the
-.I certificate.pem
-file.
-
-The administrator should make sure that there are matching
-certificates for each of the virtual hosts on this server, and that
-there is a generic
-.I certificate.pem
-file.
-
-If no suitable certificate is installed,
-.B shellinaboxd
-will attempt to invoke
-.B /usr/bin/openssl
-and create a new self-signed certificate. This only succeeds if, after
-dropping privileges,
-.B shell\%ina\%boxd
-has write permissions for
-.IR certdir .
-
-Most browsers show a warning message when encountering a self-signed
-certificate and then allow the user the option of accepting the
-certificate. Due to this usability problem, and due to the perceived
-security implications, the use of auto-generated self-signed
-certificates is intended for testing or in intranet deployments, only.
-.TP
-\fB--cert-fd=\fP\fIfd\fP
-Instead of providing a
-.B --cert
-directory, it is also possible to provide a filedescriptor
-.I fd
-where the certificate and key can be retrieved. While this option disables
-.B SNI
-support, it does offer an alternative solution for securely providing
-the private key data to the daemon.
 .TP
 \fB--css=\fP\fIfilename\fP
 Sometimes, it is not necessary to replace the entire style sheet using the
@@ -453,16 +400,6 @@ or
 respectively.
 .RE
 .TP
-\fB-t\fP\ |\ \fB--disable-ssl\fP
-By default,
-.B shellinaboxd
-redirectes all incoming HTTP requests to their equivalent HTTPS
-URLs. If promoting of connections to encrypted SSL/TLS sessions is
-undesired, this behavior can be disabled.
-
-This option is also useful during testing or for deployment in trusted
-intranets, if SSL certificates are unavailable.
-.TP
 \fB--disable-ssl-menu\fP
 If the user should not be able to switch between HTTP and HTTPS modes, this
 choice can be removed from the context menu. The user can still make this
@@ -728,18 +665,6 @@ the work, or from any part of it.
 If you would like to negotiate different licensing terms that are
 compatible for integration with other projects, please contact the
 author.
-.P
-If the OpenSSL
-system libraries can be found at run-time, they will be invoked by
-.B shellinaboxd
-to provide SSL/TLS support. The OpenSSL and SSLeay
-licenses require the following notices:
-.P
-This product includes software developed by the OpenSSL Project
-for use in the OpenSSL Toolkit. (http://www.openssl.org/)
-.P
-This product includes cryptographic software written by Eric Young
-(eay@cryptsoft.com)
 .SH BUGS
 Due to browser limitations, some features might not be available to
 users of all browers.

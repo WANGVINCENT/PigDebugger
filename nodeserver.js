@@ -66,7 +66,7 @@ var httpServer = http.createServer(function(req, res) {
   	var filePath = req.url;
   	
     if (filePath == '/' || filePath == '/pig.html')
-		filePath = __dirname + '/pig.html';
+		filePath = __dirname + '/test.html';
 	
 	//Allow download of output file
 	if (filePath == '/download.html'){
@@ -134,7 +134,8 @@ var io = require('socket.io').listen(httpServer);
 
 io.sockets.on('connection', function (socket) {
 	
-	var openTerminal = 'shellinaboxd --port=5678 --css=\'' + __dirname + '/shellinabox-2.14/shellinabox/white-on-black.css\'';
+	var openTerminal = 'shellinaboxd --css=\'' + __dirname + '/shellinabox-2.14/shellinabox/white-on-black.css\'';
+	console.log(openTerminal);
 	process.exec(openTerminal, puts);
 
 	//Get pig script names in 'scripts' directory

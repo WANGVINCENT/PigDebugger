@@ -17,7 +17,7 @@ old_library='liblogging.a'
 inherited_linker_flags=''
 
 # Libraries that this one depends upon.
-dependency_libs=' -lz -ldl -lutil'
+dependency_libs=' -ldl -lutil'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
