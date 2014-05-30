@@ -7,19 +7,15 @@ var sys = require('sys')
 var process = require('child_process');
 var mysql = require('mysql');
 
-
 var exec;
 var tcpData;
 var httpSocket;
 var output;
 var uuid;
 
-
 var tcpPort = 6969;
 var httpPort = 8080;
-
 var host = 'localhost';
-
 
 /*
 ***************************************mysql_dbpool*********************************************
@@ -42,7 +38,7 @@ var pool =  mysql.createPool({
 });	
 
 /*
-**************************************TCP SERVER*****************************************
+**************************************TCP SERVER*************************************************
 */
 var tcpServer = net.createServer(function(socket) {
 	
@@ -54,14 +50,13 @@ var tcpServer = net.createServer(function(socket) {
 	});
 }).listen(tcpPort, host);
 
-
-
 /*
-**************************************HTTP SERVER*****************************************
+**************************************HTTP SERVER***************************************************
 */
 var httpServer = http.createServer(function(req, res) {
 	
 	console.log("request received from: " + req.connection.remoteAddress);
+	console.log(global.output);
 
   	var filePath = req.url;
   	
@@ -107,15 +102,12 @@ var httpServer = http.createServer(function(req, res) {
 					} else {
 
 						if(contentType == 'text/html'){
-							
 							var test = content.toString().match(/^.*(script).*$/);
-							console.log(test);
 						}
 						res.writeHead(200, { 'Content-Type': contentType });
 						res.write(content, 'utf-8');
 
 						res.end();
-						
 					}
 				});
 			} else {
@@ -126,7 +118,6 @@ var httpServer = http.createServer(function(req, res) {
 	}
 }).listen(httpPort);
 
-
 /*
 ********************************SOCKET IO******************************************
 */
@@ -135,12 +126,11 @@ var io = require('socket.io').listen(httpServer);
 io.sockets.on('connection', function (socket) {
 	
 	var openTerminal = 'shellinaboxd --css=\'' + __dirname + '/shellinabox-2.14/shellinabox/white-on-black.css\'';
-	console.log(openTerminal);
 	process.exec(openTerminal, puts);
 
 	//Get pig script names in 'scripts' directory
 	var scripts = fs.readdirSync(__dirname+'/scripts/');
-	socket.emit('scriptNames',scripts);
+	socket.emit('scriptNames', scripts);
 
 	//Save pig script
 	socket.on('saveFile', function (data) {
@@ -171,7 +161,6 @@ io.sockets.on('connection', function (socket) {
     	httpSocket = socket;
 
     	var executionString = '';
-    	//executionString = 'java -Xmx2048m -Xms256m -cp ' + __dirname + '/bin';
     	executionString = 'java -Xmx512m -Xms256m -cp ' + __dirname + '/bin';
     	executionString += ':' + __dirname + '/bin/hibernate/*';
     	if(data.mode == 'mapreduce'){
@@ -185,7 +174,6 @@ io.sockets.on('connection', function (socket) {
     	executionString += 'script';
     	
     	exec = process.exec(executionString, puts);
-    	console.log(executionString);
     });
 
     //kill pig process
@@ -199,14 +187,14 @@ io.sockets.on('connection', function (socket) {
     	uuid = data.uuid;
 	});
 
-    socket.on('tab', function(data){
-    	if(data == 'history'){
-    		getOutput(socket, 1);
-    	}
-    });
+	socket.on('downloadHistoryOutput', function(data){
+		uuid = data;
+		console.log(uuid);
+		getHistoryOutput(socket, uuid);
+	});
 
     socket.on('historycurrentPage', function(data){
-    	getOutput(socket, data);
+    	getHistoryTable(socket, data);
     });
 });
 
@@ -217,11 +205,11 @@ function puts(error, stdout, stderr)
 
 //createDatabase('test');
 
-
-function getOutput(socket, historycurrentPage){
-	var start = (parseInt(historycurrentPage) - 1) * 10;
+var historyRecordPerPage = 12;
+function getHistoryTable(socket, historycurrentPage){
+	var start = (parseInt(historycurrentPage) - 1) * historyRecordPerPage;
 	 
-	var query = 'SELECT id, name, script_uuid, time, state FROM output ORDER BY id DESC LIMIT 10 OFFSET ' + start + ';SELECT COUNT(*) AS number FROM output;'; 
+	var query = 'SELECT id, name, script_uuid, time, state FROM output ORDER BY id DESC LIMIT ' + historyRecordPerPage + ' OFFSET ' + start + ';SELECT COUNT(*) AS number FROM output;'; 
 	pool.getConnection(function(err, connection){
   		connection.query(query, function(err, rows){
 		  	if(err) {
@@ -230,6 +218,24 @@ function getOutput(socket, historycurrentPage){
 		  		var result = {'items': rows[0], 'number': rows[1]};
 		  		socket.emit('result', result);
 	  		}
+  		});
+  		connection.release();
+	});
+}
+
+function getHistoryOutput(socket, uuid){
+	var query = 'SELECT output FROM output WHERE script_uuid = "' + uuid + '";'; 
+	pool.getConnection(function(err, connection){
+  		connection.query(query, function(err, rows){
+		  	if(err) {
+		  		throw err;
+		  	}else {
+		  		output = rows[0].output.toString().replace(/\[/g, "(");
+		  		output = output.replace(/\]/g, ')');
+		  		output = output.replace(/-/g, '\n');
+		  		console.log(output);
+		  		socket.emit('outputDone','outputDone');
+		  	}
   		});
   		connection.release();
 	});
@@ -261,13 +267,3 @@ function createDatabase(db_name){
   	});
 }
 */
-
-
-
-
-
-
-
-
-
-

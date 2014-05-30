@@ -31,8 +31,3 @@ population_per_state_order = ORDER population_name BY population DESC;
 ten_in_population_per_state_order = LIMIT population_per_state_order 10;
 
 DUMP ten_in_population_per_state_order;
-
-
-
-
-

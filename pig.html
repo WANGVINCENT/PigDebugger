@@ -16,12 +16,13 @@
 		  	<li class="active"><a href="/">Pig</a></li>
 			<li><a id="queryhistory_navbar" style="cursor: pointer;" onclick="setHistory(this)">Query History</a></li>
 			<li><a id="terminal_navbar" style="cursor: pointer;" onclick="setPigTerminal(this)">Terminal</a></li>
+			<li><a id="about_navbar" style="cursor: pointer;">About Author</a></li>
 		</ul>
 		<div id="pigbody">
 			<div class="container well" id="scriptZone">
 				<form id="searchform" class="form-search">
 					<div class="input-prepend">
-						<button type="submit" style="height:21%;" class="btn" disabled="true"><i class="icon-search icon-white"></i></button><input id="search" type="text" class="search-query" placeholder="Search">
+						<button type="submit" style="height:17%;width:13%;" class="btn" disabled="true"><i class="icon-search icon-white"></i></button><input id="search" type="text" class="search-query" placeholder="Search">
 					</div>
 				</form>
 	   			<div id="turnpage">
@@ -102,8 +103,6 @@
 	       				<tbody id="stateLog"></tbody>
 	       			</table>
 				</div> 
-				
-				<div id="foot">Author : Nan Wang - Imperial College London</div><br />
 				<div id="progressBarBackup" class="progress progress-striped active">
 					  <div id="progressionBackup" class="bar" style="width:0%;font-style:normal;font-size:100%;">0%</div>
 				</div>
@@ -139,6 +138,10 @@
 				showPigHelper();
 
 				showToolTip();
+
+				//Disable download output button and download progresslog button
+				$('#downloadOutputButton').attr('disabled', true);
+				$('#downloadProgressLogButton').attr('disabled', true);
 			});
 
 	        //script input editor
@@ -224,6 +227,7 @@
 				var tip_array = {
 					'#helper' : 'Pig Helper helps you find the needed Pig Operators!',
 					'#tip' : 'Type at least 3 letters and press shift to enable autocompletion!',
+					'#mode' : 'Choose local/mapreduce mode',
 					'#createScriptButton' : 'New Button enables to create a new Pig script!',
 					'#saveScriptButton' : 'Save Button enables to save an existed Pig script!',
 					'#resetinputarea' : 'Reset Button enables to empty the Pig text area below!',
@@ -231,15 +235,18 @@
 					'#downloadProgressLog' : 'Download ProgressLog Button enables to downlaod the progress log not until the Pig script execution is finished!',
 					'#queryhistory_navbar' : 'Query History helps you visualize the previous Pig script information!',
 					'#terminal_navbar' : 'Terminal helps you interact with console!',
+					'#about_navbar' : 'Nan Wang -- Imperial College London -- 2014',
 					'#executeButton' : 'Execute Button enables you to launch the execution of the Pig script!',
 					'#killButton' : 'Kill Button enables you to stop the execution of the running Pig script!',
 					'#logButton' : 'This Button enables you to show/hide the progress log area!',
-					'#outputButton' : 'Open Output Button enables you to show/hide the output area!'
+					'#outputButton' : 'Open Output Button enables you to show/hide the output area!',
+					'#searchform' : 'Search widget helps you find the specific pig script!',
+					'#progressBar' : 'Progress bar!'
 				}
 
 				for(var i in tip_array){
 					$(i).attr('title', tip_array[i]);
-					if(i == '#queryhistory_navbar' || i == '#terminal_navbar'){
+					if(i == '#queryhistory_navbar' || i == '#terminal_navbar' || i == '#about_navbar'){
 						$(i).attr('data-placement', 'bottom');
 					}
 					$(i).tooltip();
@@ -307,7 +314,6 @@
 						$('#progression').html('99%');
 						$('#progressionBackup').html('99%');
 					}
-				
 				} else if(data.notification == 'output'){
 					transformOutput(data.result);
 				} else if(data.notification == 'success'){
@@ -330,7 +336,6 @@
 					$('#logcontainer').css('height','50%');
 
 				}else if(data.notification == 'mapreduceprogress'){
-
 					if(parseInt(data.mapprogress) == 1 && parseInt(data.reduceprogress) == 0){
 						$('#map_'+data.jobid).css('width', parseInt(data.mapprogress)*100 + '%');
 						$('#map_'+data.jobid).html('Map '+parseInt(data.mapprogress)*100+'%');
@@ -342,7 +347,6 @@
 					        $('#reduce_'+data.jobid).css('width', '25%');
 					        $('#reduce_'+data.jobid).html('Reduce 25%');
 					    }, delay); 
-
 					}else if(parseInt(data.mapprogress) == 1 && parseInt(data.reduceprogress) == 1){
 						$('#map_'+data.jobid).css('width', parseInt(data.mapprogress)*100 + '%');
 						$('#reduce_'+data.jobid).css('width', '90%');
@@ -393,7 +397,6 @@
 			        }
 					
 				}else if(data.notification == 'jobfinish'){
-
 					if(data.mode == 'mapreduce'){
 						if($('#reduce_'+data.jobid).css('width') != '100%'){
 							$('#reduce_'+data.jobid).css('width','100%');
@@ -422,8 +425,7 @@
 								$('#reduce_' + mapreduceprogressRecord[i]).html('Reduce 100%');
 							}
 				        }
-				       
-					}else{
+				    }else{
 						var delay = 500;
 					    setTimeout(function(){
 							string += '<tr>';
@@ -442,7 +444,6 @@
 							}
 					    }, delay); 
 					}
-					
 				}else if(data.notification == 'start'){
 					currentScriptUUID = data.uuid;
 					
@@ -460,7 +461,6 @@
 					for(var i in aliasArray){
 						alias[i] = aliasArray[i].split(',');
 					}
-					console.log(alias);
 
 					string += '<tr>';
 			        string += '<td>' + data.operation + '</td>';
@@ -508,7 +508,7 @@
 
 	        var totalPageNumber;
 	        var scripts;
-	        var itemNumber = 10;
+	        var itemNumber = 11;
 	        //Get script names
 		   	socket.on('scriptNames', function(data) {
 		   		scripts = data;
@@ -787,7 +787,7 @@
 
 			var historycurrentPage = 1;
 			var historytotalPage = 1;
-			var historynumberPerPage = 11;
+			var historynumberPerPage = 12;
 			function historyLastPage(){
 				if(historycurrentPage == 1 || historycurrentPage == 0){
 					alert('First page!')
@@ -818,19 +818,19 @@
 				res += '<div><table class="table table-striped table-condensed">';
 				res += '<thead><tr><td style="text-align:center;">#</td><td style="text-align:center;">name</td><td style="text-align:center;">uuid</td><td style="text-align:center;">time</td><td style="text-align:center;">state</td><td style="text-align:center;">Output</td><td style="text-align:center;">ProgressLog</td></tr></thead><tbody>';
 				for(var i in data){
-					res += '<tr>';
+					res += '<tr style="height:4%;">';
 					res += '<td style="text-align:center;">' + data[i].id + '</td>';
-					res += '<td class="span4" style="text-align:center;word-break:break-all;">' + data[i].name + '</td>';
+					res += '<td style="text-align:center;word-break:break-all;">' + data[i].name + '</td>';
 
 					res += '<td style="text-align:center;">' + data[i].script_uuid + '</td>';
 					res += '<td style="text-align:center;">' + data[i].time + '</td>';
 					if(data[i].state == 'Fail'){
-						res += '<td style="text-align:center;"><span class="label label-important" style="height:100%;padding-top:7%;font-size:17px;">' + data[i].state + '</span></td>';
-						res += '<td style="text-align:center;"><button class="btn btn-primary">Output <i class="icon-download-alt icon-white"></i></button></td>';
+						res += '<td style="text-align:center;"><span class="label label-important" style="height:65%;padding-top:7%;font-size:12pt;">' + data[i].state + '</span></td>';
+						res += '<td style="text-align:center;"><button class="btn btn-danger">ErrorLog<i class="icon-download-alt icon-white"></i></button></td>';
 						res += '<td style="text-align:center;"><button class="btn btn-warning" disabled>ProgressLog <i class="icon-download-alt icon-white"></i></button></td></tr>';
 					}else{
-						res += '<td style="text-align:center;"><span class="label label-success" style="height:100%;padding-top:7%;font-size:17px;text-align:center;">' + data[i].state + '</span></td>';
-						res += '<td style="text-align:center;"><button class="btn btn-primary">Output <i class="icon-download-alt icon-white"></i></button></td>';
+						res += '<td style="text-align:center;"><span class="label label-success" style="height:65%;padding-top:7%;font-size:12pt;text-align:center;">' + data[i].state + '</span></td>';
+						res += '<td style="text-align:center;"><button class="btn btn-primary" name="' + data[i].script_uuid + '" onclick="downloadHistoryOutput(this.name)">Output <i class="icon-download-alt icon-white"></i></button></td>';
 						res += '<td style="text-align:center;"><button class="btn btn-warning">ProgressLog <i class="icon-download-alt icon-white"></i></button></td></tr>';
 					}
 				}
@@ -844,10 +844,19 @@
 				$('#historytotalPage').html(historytotalPage);
 			}
 
+			socket.on('outputDone', function(data){
+				var win = window.open("download.html", '_blank');
+				win.focus();
+			});
+
+			function downloadHistoryOutput(uuid){
+				socket.emit('downloadHistoryOutput', uuid);
+			}
+
 			function setHistory(node){
 				$('#navtab').children().removeClass('active');
 				$(node).parent().addClass('active');
-				socket.emit('tab','history');
+				socket.emit('historycurrentPage', 1);
 			}
 
 			function setMode(mode){
