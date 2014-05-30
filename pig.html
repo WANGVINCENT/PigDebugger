@@ -14,8 +14,8 @@
 		<img id="pigicon" src="img/pig.jpeg" />
 		<ul id="navtab" class="nav nav-pills">
 		  	<li class="active"><a href="/">Pig</a></li>
-			<li><a style="cursor: pointer;" onclick="setHistory(this)">Query History</a></li>
-			<li><a style="cursor: pointer;" onclick="setPigTerminal(this)">Terminal</a></li>
+			<li><a id="queryhistory_navbar" style="cursor: pointer;" onclick="setHistory(this)">Query History</a></li>
+			<li><a id="terminal_navbar" style="cursor: pointer;" onclick="setPigTerminal(this)">Terminal</a></li>
 		</ul>
 		<div id="pigbody">
 			<div class="container well" id="scriptZone">
@@ -70,7 +70,7 @@
 				</div>
 	   			<button class="btn btn-success" id="createScriptButton" onclick="createScript()">New <i class="icon-plus-sign icon-white"></i></button>
 	   			<button class="btn btn-primary" id="saveScriptButton" onclick="saveScript()">Save <i class="icon-hdd icon-white"></i></button>
-	   			<button id="resetinputarea" class="btn btn-danger" onclick="resetScript()">Reset script <i class="icon-repeat icon-white"></i></button>
+	   			<button class="btn btn-danger" id="resetinputarea" onclick="resetScript()">Reset script <i class="icon-repeat icon-white"></i></button>
 				<textarea id="scriptinputarea" style="word-break:break-all;"></textarea>
 		   		<div id="progressBar" class="progress progress-striped active">
 					<div id="progression" class="bar" style="width:0%;font-style:normal;font-size:100%;">0%</div>
@@ -138,17 +138,10 @@
 
 				showPigHelper();
 
-				var tiptitle = 'Press shift : autocompletion;\n Pig';
-
-				$('#tip').attr('title', tiptitle);
-				$('#tip').tooltip();
+				showToolTip();
 			});
 
 	        //script input editor
-			var keywords = ['FOREACH', 'GENERATE', 'LIMIT', 'GROUP', 'STORE', 'TOKENIZE', 'EXPLAIN', 'ILLUSTRATE', 'DESCRIBE', 'IMPORT', 'CONCAT', 
-							'COUNT', 'DISTINCT', 'FILTER', 'FLOOR', 'RANDOM', 'ROUND', 'TOTUPLE', 'TOBAG', 'TOMAP', 'INDEXOF', 'REPLACE', 'REGEX_EXTRACT',
-							'LOWER', 'LAST_INDEX_OF', 'REGEX_EXTRACT_ALL', 'STRSPLIT', 'SUBSTRING', 'UCFIRST', 'UPPER', 'FLATTEN', 'CROSS', 'ORDER', 
-							'SAMPLE', 'SPLIT', 'UNION', 'COGROUP', 'COUNT_START', 'PARALLEL'];
 			var editor = CodeMirror.fromTextArea($('#scriptinputarea')[0], {
 		        lineNumbers: true,
 		        indentUnit: 4,
@@ -156,6 +149,11 @@
 		        autofocus:true,
 		    });
 		    editor.on('keyup', function(cm, e) {
+				var keywords = ['FOREACH', 'GENERATE', 'LIMIT', 'GROUP', 'STORE', 'TOKENIZE', 'EXPLAIN', 'ILLUSTRATE', 'DESCRIBE', 'IMPORT', 'CONCAT', 
+							'COUNT', 'DISTINCT', 'FILTER', 'FLOOR', 'RANDOM', 'ROUND', 'TOTUPLE', 'TOBAG', 'TOMAP', 'INDEXOF', 'REPLACE', 'REGEX_EXTRACT',
+							'LOWER', 'LAST_INDEX_OF', 'REGEX_EXTRACT_ALL', 'STRSPLIT', 'SUBSTRING', 'UCFIRST', 'UPPER', 'FLATTEN', 'CROSS', 'ORDER', 
+							'SAMPLE', 'SPLIT', 'UNION', 'COGROUP', 'COUNT_START', 'PARALLEL'];
+
 		    	var words = editor.getDoc().getValue().split(/[\s\W]+/);
 	        	var lastword = words.pop();
 	        	//Press shift to autocomplete
@@ -173,42 +171,42 @@
 	        	}
 			});
 
-	        var pighelper = {
-	        	'Eval Fucntions': [ 
-	        		'AVG(%VAR%)', 'CONCAT(%VAR%)', 'COUNT(%VAR%)', 'COUNT_START(%VAR%)', 'IsEmpty(%VAR%)', 'DIFF(%VAR1%, %VAR2%)', 'MAX(%VAR%)', 
-	        		'MIN(%VAR%)', 'SIZE(%VAR%)', 'SUM(%VAR%)', 'TOKENIZE(%VAR%, %DELIMITER%)'],
+	        function showPigHelper(){
+				var pighelper = {
+		        	'Eval Fucntions': [ 
+		        		'AVG(%VAR%)', 'CONCAT(%VAR%)', 'COUNT(%VAR%)', 'COUNT_START(%VAR%)', 'IsEmpty(%VAR%)', 'DIFF(%VAR1%, %VAR2%)', 'MAX(%VAR%)', 
+		        		'MIN(%VAR%)', 'SIZE(%VAR%)', 'SUM(%VAR%)', 'TOKENIZE(%VAR%, %DELIMITER%)'],
 
-	        	'Relational Operators':[
-	        		'COGROUP %VAR% BY %VAR%', 'CROSS %VAR1%, %VAR2%', 'DISTINCT %VAR%', 'FILTER %VAR% BY %CONDITION%', 'FLATTEN(%VAR%)',
-	        		'FOREACH %DATA% GENERATE %NEW_DATA%', 'FOREACH %DATA% {%NESTED_BLOCK%}', 'GROUP %VAR% BY %VAR%', 'GROUP %VAR% ALL', 'JOIN %VAR% BY', 
-	        		'LIMIT %VAR% %N%', 'ORDER %VAR% BY %FIELD%', 'SAMPLE %VAR% %SIZE%', 'SPLIT %VAR1% INTO %VAR2% IF %EXPRESSION%', 
-	        		'UNION %VAR1%, %VAR2%', 'PARALLEL %NUM%'],
+		        	'Relational Operators':[
+		        		'COGROUP %VAR% BY %VAR%', 'CROSS %VAR1%, %VAR2%', 'DISTINCT %VAR%', 'FILTER %VAR% BY %CONDITION%', 'FLATTEN(%VAR%)',
+		        		'FOREACH %DATA% GENERATE %NEW_DATA%', 'FOREACH %DATA% {%NESTED_BLOCK%}', 'GROUP %VAR% BY %VAR%', 'GROUP %VAR% ALL', 'JOIN %VAR% BY', 
+		        		'LIMIT %VAR% %N%', 'ORDER %VAR% BY %FIELD%', 'SAMPLE %VAR% %SIZE%', 'SPLIT %VAR1% INTO %VAR2% IF %EXPRESSION%', 
+		        		'UNION %VAR1%, %VAR2%', 'PARALLEL %NUM%'],
 
-	        	'I/O':[
-	        		'LOAD \'%FILE%\'', 'DUMP %VAR%', 'STORE %VAR% INTO %PATH%'],
+		        	'I/O':[
+		        		'LOAD \'%FILE%\'', 'DUMP %VAR%', 'STORE %VAR% INTO %PATH%'],
 
-	        	'Debug':[
-	        		'EXPLAIN %VAR%', 'ILLUSTRATE %VAR%', 'DESCRIBE %VAR%'],
+		        	'Debug':[
+		        		'EXPLAIN %VAR%', 'ILLUSTRATE %VAR%', 'DESCRIBE %VAR%'],
 
-	        	'Math': [			
-	        		'ABS(%VAR%)', 'ACOS(%VAR%)', 'ASIN(%VAR%)', 'ATAN(%VAR%)', 'CBRT(%VAR%)', 'CEIL(%VAR%)', 'COS(%VAR%)', 'COSH(%VAR%)', 'EXP(%VAR%)',
-	        		'FLOOR(%VAR%)', 'LOG(%VAR%)', 'LOG10(%VAR%)', 'RANDOM(%VAR%)', 'ROUND(%VAR%)', 'SIN(%VAR%)', 'SINH(%VAR%)', 'TAN(%VAR%)', 
-	        		'TANH(%VAR%)'],
+		        	'Math': [			
+		        		'ABS(%VAR%)', 'ACOS(%VAR%)', 'ASIN(%VAR%)', 'ATAN(%VAR%)', 'CBRT(%VAR%)', 'CEIL(%VAR%)', 'COS(%VAR%)', 'COSH(%VAR%)', 'EXP(%VAR%)',
+		        		'FLOOR(%VAR%)', 'LOG(%VAR%)', 'LOG10(%VAR%)', 'RANDOM(%VAR%)', 'ROUND(%VAR%)', 'SIN(%VAR%)', 'SINH(%VAR%)', 'TAN(%VAR%)', 
+		        		'TANH(%VAR%)'],
 
-	        	'Tuple,Bag,Map Functions':[
-	        		'TOTUPLE(%VAR%)', 'TOBAG(%VAR%)', 'TOMAP(%KEY%, %VALUE%)', 'TOP(%topN%, %COLUMN%, %RELATION%)'],
+		        	'Tuple,Bag,Map Functions':[
+		        		'TOTUPLE(%VAR%)', 'TOBAG(%VAR%)', 'TOMAP(%KEY%, %VALUE%)', 'TOP(%topN%, %COLUMN%, %RELATION%)'],
 
-	        	'String Functions':[
-	        		'INDEXOF(%STRING%, \'CHARACTER\', %START_INDEX%)', 'LAST_INDEX_OF(%STRING%, \'CHARACTER\', %START_INDEX%)', 'LOWER(%STRING%)',
-	        		'REGEX_EXTRACT(%STRING%, %REGEX%, %INDEX%)', 'REGEX_EXTRACT_ALL(%STRING%, %REGEX%)', 'REPLACE(%STRING%, %OLD_CHAR%, %NEW_CHAR%)',
-	        		'STRSPLIT(%STRING%, %REGEX%, %LIMIT%)', 'SUBSTRING(%STRING%, %START_INDEX%, %END_INDEX%)', 'TRIM(%STRING%)', 'UCFIRST(%STRING%)',
-	        		'UPPER(%STRING%)'],
+		        	'String Functions':[
+		        		'INDEXOF(%STRING%, \'CHARACTER\', %START_INDEX%)', 'LAST_INDEX_OF(%STRING%, \'CHARACTER\', %START_INDEX%)', 'LOWER(%STRING%)',
+		        		'REGEX_EXTRACT(%STRING%, %REGEX%, %INDEX%)', 'REGEX_EXTRACT_ALL(%STRING%, %REGEX%)', 'REPLACE(%STRING%, %OLD_CHAR%, %NEW_CHAR%)',
+		        		'STRSPLIT(%STRING%, %REGEX%, %LIMIT%)', 'SUBSTRING(%STRING%, %START_INDEX%, %END_INDEX%)', 'TRIM(%STRING%)', 'UCFIRST(%STRING%)',
+		        		'UPPER(%STRING%)'],
 
-	        	'Macro':[
-	        		'IMPORT \'PATH_TO_MACRO\''],
-			};
+		        	'Macro':[
+		        		'IMPORT \'PATH_TO_MACRO\'']
+				};
 
-			function showPigHelper(){
 				var res = '';
 				for(var i in pighelper){
 					res += '<li class="dropdown-submenu">';
@@ -220,6 +218,32 @@
 				}
 			
 				$('#pighelper').html(res);
+			}
+
+			function showToolTip(){
+				var tip_array = {
+					'#helper' : 'Pig Helper helps you find the needed Pig Operators!',
+					'#tip' : 'Type at least 3 letters and press shift to enable autocompletion!',
+					'#createScriptButton' : 'New Button enables to create a new Pig script!',
+					'#saveScriptButton' : 'Save Button enables to save an existed Pig script!',
+					'#resetinputarea' : 'Reset Button enables to empty the Pig text area below!',
+					'#downloadOutputButton' : 'Download Output Button enables you to download the output not until the Pig script execution is finished!',
+					'#downloadProgressLog' : 'Download ProgressLog Button enables to downlaod the progress log not until the Pig script execution is finished!',
+					'#queryhistory_navbar' : 'Query History helps you visualize the previous Pig script information!',
+					'#terminal_navbar' : 'Terminal helps you interact with console!',
+					'#executeButton' : 'Execute Button enables you to launch the execution of the Pig script!',
+					'#killButton' : 'Kill Button enables you to stop the execution of the running Pig script!',
+					'#logButton' : 'This Button enables you to show/hide the progress log area!',
+					'#outputButton' : 'Open Output Button enables you to show/hide the output area!'
+				}
+
+				for(var i in tip_array){
+					$(i).attr('title', tip_array[i]);
+					if(i == '#queryhistory_navbar' || i == '#terminal_navbar'){
+						$(i).attr('data-placement', 'bottom');
+					}
+					$(i).tooltip();
+				}
 			}
 
 			function selectHelperFunction(value){
