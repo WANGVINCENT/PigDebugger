@@ -1,7 +1,7 @@
-PigDebugger
-===========
+Pig Latin Debugger
+==================
 
-Pig Debugger is a web-based user interface enabling users to keep track of the execution of Pig Latin scripts in Hadoop HDFS or local file system.
+Pig Latin Debugger is a web-based user interface enabling users to keep track of the execution of Pig Latin scripts in Hadoop HDFS or local file system.
 
 Configuration
 =============
