@@ -6,7 +6,9 @@ Pig Latin Debugger is a web-based user interface enabling users to keep track of
 Configuration
 =============
   
-    Run config.sh script
+To configure, please run the script 
+    
+    sh config.sh 
     
 Launch
 ======
