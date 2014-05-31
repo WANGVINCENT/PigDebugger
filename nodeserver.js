@@ -59,8 +59,8 @@ var httpServer = http.createServer(function(req, res) {
 
   	var filePath = req.url;
   	
-    if (filePath == '/' || filePath == '/pig.html')
-		filePath = __dirname + '/pig.html';
+    if (filePath == '/' || filePath == '/index.html')
+		filePath = __dirname + '/index.html';
 	
 	//Allow download of output file
 	if (filePath == '/download.html'){
