@@ -311,6 +311,7 @@
 			var mode;
 			var kill = false;
 			var alias = {};
+			var fail = false;
 			function coordinate(data){
 		        if(data.notification == 'fail'){
 	        		$('#success').attr('class','label label-important');
@@ -325,6 +326,7 @@
 			        string += '<td>' + data.error + '</td>';
 			        string += '</tr>';
 					$('#stateLog').html(string);
+					fail = true;
 
 	        	} else if(data.notification == 'progress'){
 	        		if(parseInt(data.progress) != 100){
@@ -333,10 +335,12 @@
 	        			$('#progressionBackup').css('width',parseInt(data.progress)+'%');
 						$('#progressionBackup').html(parseInt(data.progress)+'%');
 	        		}else{
-						$('#progression').css('width','99%');
-						$('#progressionBackup').css('width','99%');
-						$('#progression').html('99%');
-						$('#progressionBackup').html('99%');
+	        			if(!fail){
+	        				$('#progression').css('width','99%');
+							$('#progressionBackup').css('width','99%');
+							$('#progression').html('99%');
+							$('#progressionBackup').html('99%');
+	        			}
 					}
 				} else if(data.notification == 'output'){
 					transformOutput(data.result);
@@ -770,6 +774,7 @@
 				string = '';
 				mapreduceprogressRecord = [];
 				$( "div.CodeMirror-code").children().css("background-color", "white");
+				fail = false;
 			}
 
 			//open state log
@@ -919,12 +924,12 @@
 					res += '<td style="text-align:center;width:15%;">' + data[i].time + '</td>';
 					if(data[i].state == 'Fail'){
 						res += '<td style="text-align:center;"><span class="label label-important" style="height:65%;padding-top:7%;font-size:12pt;">' + data[i].state + '</span></td>';
-						res += '<td style="text-align:center;"><button class="btn btn-danger">ErrorLog<i class="icon-download-alt icon-white"></i></button></td>';
+						res += '<td style="text-align:center;"><button class="btn btn-danger" name="' + data[i].script_uuid + '" onclick="downloadHistoryOutput(this.name, \'error\')">ErrorLog<i class="icon-download-alt icon-white"></i></button></td>';
 						res += '<td style="text-align:center;width:11%;"><button class="btn btn-warning" disabled>ProgressLog <i class="icon-download-alt icon-white"></i></button></td>';
 						res += '<td style="text-align:center;width:11%;"><button class="btn btn-info" disabled>ExplainLog <i class="icon-download-alt icon-white"></i></button></td></tr>'
 					}else{
 						res += '<td style="text-align:center;width:8%;"><span class="label label-success" style="height:65%;padding-top:7%;font-size:12pt;text-align:center;">' + data[i].state + '</span></td>';
-						res += '<td style="text-align:center;width:10%;"><button class="btn btn-primary" name="' + data[i].script_uuid + '" onclick="downloadHistoryOutput(this.name)">Output <i class="icon-download-alt icon-white"></i></button></td>';
+						res += '<td style="text-align:center;width:10%;"><button class="btn btn-primary" name="' + data[i].script_uuid + '" onclick="downloadHistoryOutput(this.name, \'output\')">Output <i class="icon-download-alt icon-white"></i></button></td>';
 						res += '<td style="text-align:center;width:11%;"><button class="btn btn-warning" name="' + data[i].script_uuid + '" onclick="downloadHistoryProgressLog(this.name)">ProgressLog <i class="icon-download-alt icon-white"></i></button></td>';
 						res += '<td style="text-align:center;width:11%;"><button class="btn btn-info" name="' + data[i].script_uuid + '" onclick="downloadHistoryExplainLog(this.name)">ExplainLog <i class="icon-download-alt icon-white"></i></button></td></tr>'
 					}
@@ -944,8 +949,12 @@
 				win.focus();
 			});
 
-			function downloadHistoryOutput(uuid){
-				socket.emit('downloadHistoryOutput', uuid);
+			function downloadHistoryOutput(uuid, type){
+				var data = {
+					'uuid' : uuid,
+					'type' : type
+				};
+				socket.emit('downloadHistoryOutput', data);
 			}
 
 			function downloadHistoryProgressLog(uuid){

@@ -219,8 +219,8 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	socket.on('downloadHistoryOutput', function(data){
-		uuid = data;
-		getHistoryOutput(socket, uuid);
+		uuid = data.uuid;
+		getHistoryOutput(socket, data);
 	});
 
     socket.on('historycurrentPage', function(data){
@@ -253,18 +253,21 @@ function getHistoryTable(socket, historycurrentPage){
 	});
 }
 
-function getHistoryOutput(socket, uuid){
-	//var query = 'SELECT output FROM output WHERE script_uuid = "' + uuid + '";'; 
+function getHistoryOutput(socket, data){
 	var query = 'SELECT output FROM output WHERE ?';
-	var filter = {script_uuid : uuid};
+	var filter = {script_uuid : data.uuid};
 	pool.getConnection(function(err, connection){
   		connection.query(query, filter, function(err, rows){
 		  	if(err) {
 		  		throw err;
 		  	}else {
-		  		output = rows[0].output.toString().replace(/\[/g, "(");
-		  		output = output.replace(/\]/g, ')');
-		  		output = output.replace(/-/g, '\n');
+		  		if(data.type == 'output'){
+		  			output = rows[0].output.toString().replace(/\[/g, "(");
+			  		output = output.replace(/\]/g, ')');
+			  		output = output.replace(/-/g, '\n');
+			  	}else{
+		  			output = rows[0].output.toString();
+		  		}
 		  		socket.emit('getResultFromDb','outputDone');
 		  	}
   		});
