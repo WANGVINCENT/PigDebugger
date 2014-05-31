@@ -54,6 +54,7 @@
         <!-- Names the annotated entity class -->
         <mapping class="nanwang.pig.entity.Job"/>
         <mapping class="nanwang.pig.entity.Output"/>
+        <mapping class="nanwang.pig.entity.MRPlan"/>
 
     </session-factory>
 

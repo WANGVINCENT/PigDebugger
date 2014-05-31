@@ -172,7 +172,6 @@ io.sockets.on('connection', function (socket) {
     	executionString += tcpPort + ' ';
     	executionString += 'script';
     	exec = process.exec(executionString, puts);
-    	console.log(executionString);
     });
 
     //kill pig process
@@ -197,12 +196,26 @@ io.sockets.on('connection', function (socket) {
     	explainString += tcpPort + ' ';
     	explainString += 'explain';
     	exec = process.exec(explainString, puts);
-    	console.log(explainString);
 	});
 
     socket.on('downloadOutput', function(data){
     	output = data.result;
     	uuid = data.uuid;
+	});
+
+	socket.on('downloadProgressLog', function(data){
+		uuid = data;
+		getProgressLog(socket, uuid);
+	});
+
+	socket.on('downloadExplainLog', function(data){
+		output = data.result;
+		uuid = data.uuid;
+	});
+
+	socket.on('downloadHistoryExplainLog', function(data){
+		uuid = data;
+		getExplainLog(socket, uuid);
 	});
 
 	socket.on('downloadHistoryOutput', function(data){
@@ -241,17 +254,54 @@ function getHistoryTable(socket, historycurrentPage){
 }
 
 function getHistoryOutput(socket, uuid){
-	var query = 'SELECT output FROM output WHERE script_uuid = "' + uuid + '";'; 
+	//var query = 'SELECT output FROM output WHERE script_uuid = "' + uuid + '";'; 
+	var query = 'SELECT output FROM output WHERE ?';
+	var filter = {script_uuid : uuid};
 	pool.getConnection(function(err, connection){
-  		connection.query(query, function(err, rows){
+  		connection.query(query, filter, function(err, rows){
 		  	if(err) {
 		  		throw err;
 		  	}else {
 		  		output = rows[0].output.toString().replace(/\[/g, "(");
 		  		output = output.replace(/\]/g, ')');
 		  		output = output.replace(/-/g, '\n');
-		  		socket.emit('outputDone','outputDone');
+		  		socket.emit('getResultFromDb','outputDone');
 		  	}
+  		});
+  		connection.release();
+	});
+}
+
+function getProgressLog(socket, uuid){
+	var query = 'SELECT operation FROM job WHERE ?';
+	var filter = { script_uuid : uuid };
+	pool.getConnection(function(err, connection){
+  		connection.query(query, filter, function(err, rows){
+		  	if(err) {
+		  		throw err;
+		  	}else {
+		  		output = '';
+		  		for(var i in rows){
+		  			output += rows[i].operation.toString() + '\n';
+		  		}
+		  		socket.emit('getResultFromDb','progressLogDone');
+	  		}
+  		});
+  		connection.release();
+	});
+}
+
+function getExplainLog(socket, uuid){
+	var query = 'SELECT plan FROM mrplan WHERE ?';
+	var filter = { script_uuid : uuid };
+	pool.getConnection(function(err, connection){
+  		connection.query(query, filter, function(err, rows){
+		  	if(err) {
+		  		throw err;
+		  	}else {
+		  		output = rows[0].plan.toString();
+		  		socket.emit('getResultFromDb','explainLogDone');
+	  		}
   		});
   		connection.release();
 	});
