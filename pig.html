@@ -50,7 +50,7 @@
 				</div>
 
 				<div id="mode" class="btn-group">
-					<a id="ModeText" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+					<a id="ModeText" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
 					    Mode
 					    <span class="caret"></span>
 					</a>
@@ -59,10 +59,15 @@
 						<li><a tabindex="-1" onclick="setMode(this.innerHTML)">mapreduce</a></li>
 					</ul>
 				</div>
-
-				<div id="hadoopdirdiv">
+				<!--<div id="hadoopdirdiv">
 					<input id="hadoopdir" type="text" placeholder="Hadoop Dir" />
-				</div>
+				</div>-->
+			</div>
+
+			<div id="buttongroup1">
+				<button class="btn btn-success" id="executeButton" onclick="executeScript()">Execute <i class="icon-play-circle icon-white"></i></button>
+				<button class="btn btn-danger" id="killButton" onclick="killScript()">Kill <i class="icon-stop icon-white"></i></button>
+				<button class="btn btn-info" id="explainButton" onclick="explainAlias()">Explain <i class="icon-info-sign icon-white"></i></button>
 			</div>
 			
 			<div class="container well" id="input">
@@ -71,38 +76,45 @@
 				</div>
 	   			<button class="btn btn-success" id="createScriptButton" onclick="createScript()">New <i class="icon-plus-sign icon-white"></i></button>
 	   			<button class="btn btn-primary" id="saveScriptButton" onclick="saveScript()">Save <i class="icon-hdd icon-white"></i></button>
-	   			<button class="btn btn-danger" id="resetinputarea" onclick="resetScript()">Reset script <i class="icon-repeat icon-white"></i></button>
+	   			<button class="btn btn-danger" id="resetinputButton" onclick="resetScript()">Reset script <i class="icon-repeat icon-white"></i></button>
 				<textarea id="scriptinputarea" style="word-break:break-all;"></textarea>
 		   		<div id="progressBar" class="progress progress-striped active">
 					<div id="progression" class="bar" style="width:0%;font-style:normal;font-size:100%;">0%</div>
 				</div>
 			</div>
 
-			<div id="buttongroup">
-				<button class="btn btn-warning" id="downloadOutputButton" onclick="downloadOutput()" disabled="true">Download Output <i class="icon-download-alt icon-white"></i></button>
-				<button class="btn btn-primary" id="downloadProgressLogButton" onclick="downloadProgressLog()" disabled="true">Download ProgressLog <i class="icon-download-alt icon-white"></i></button>
-				<button class="btn btn-success" id="executeButton" onclick="executeScript()">Execute <i class="icon-play-circle icon-white"></i></button>
-				<button class="btn btn-danger" id="killButton" onclick="killScript()">Kill <i class="icon-stop icon-white"></i></button>
-				<button class="btn btn-info" id="explainButton">Explain <i class="icon-info-sign icon-white"></i></button>
-				<button class="btn btn-primary" id="logButton" onclick="openStateLog()">Open ProgressLog <i class="icon-folder-open icon-white"></i></button>
+			<div id="buttongroup2">
+				<button class="btn btn-warning" id="downloadOutputButton" onclick="downloadOutput()">Download Output <i class="icon-download-alt icon-white"></i></button>
+				<button class="btn btn-primary" id="downloadProgressLogButton" onclick="downloadProgressLog()">Download ProgressLog <i class="icon-download-alt icon-white"></i></button>
+				<button class="btn btn-info" id="downloadExplainLogButton" onclick="downloadExplainLog()">Download ExplainLog <i class="icon-download-alt icon-white"></i></button>
 				<button class="btn btn-warning" id="outputButton" onclick="openOutputLog()">Open Output <i class="icon-folder-open icon-white"></i></button>
+				<button class="btn btn-primary" id="logButton" onclick="openStateLog()">Open ProgressLog <i class="icon-folder-open icon-white"></i></button>
+				<button class="btn btn-info" id="explainLogButton" onclick="openExplainLog()">Open ExplainLog <i class="icon-folder-open icon-white"></i></button>
 			</div>
 			<span id="success" class="label label-default">State</span>
 			
 			<div id="logcontainer">
-				<div class="container well" id="result">
-					<h5 id="outputlabel">Output</h5>
-					<textarea id="resultarea" disabled="true"></textarea>
-				</div>
+				
 				<div class="container well" id="progressLog">
 					<table id="progressLogTable" class="table table-striped table-condensed">
 	       				<caption>
-	       					<h5>State</h5>
+	       					<h5>Progress Log</h5>
 	       					<br />
 	       				</caption>
 	       				<tbody id="stateLog"></tbody>
 	       			</table>
 				</div> 
+
+				<div class="container well" id="result">
+					<h5 id="outputlabel">Output</h5>
+					<textarea id="resultarea" disabled="true"></textarea>
+				</div>
+
+				<div class="container well" id="explainlog">
+					<h5 id="explainlabel">Explain Log</h5>
+					<textarea id="explainarea" disabled="true"></textarea>
+				</div>
+
 				<div id="progressBarBackup" class="progress progress-striped active">
 					  <div id="progressionBackup" class="bar" style="width:0%;font-style:normal;font-size:100%;">0%</div>
 				</div>
@@ -142,9 +154,13 @@
 				//Disable download output button and download progresslog button
 				$('#downloadOutputButton').attr('disabled', true);
 				$('#downloadProgressLogButton').attr('disabled', true);
+				$('#outputButton').attr('disabled', false);
+				$('#resetinputButton').attr('disabled', false);
+				
 			});
 
 	        //script input editor
+
 			var editor = CodeMirror.fromTextArea($('#scriptinputarea')[0], {
 		        lineNumbers: true,
 		        indentUnit: 4,
@@ -159,6 +175,8 @@
 
 		    	var words = editor.getDoc().getValue().split(/[\s\W]+/);
 	        	var lastword = words.pop();
+
+	        	var last_word = words[words.length-1]
 	        	//Press shift to autocomplete
 				if(e.keyCode == 16){
 					if(lastword.length >= 3){
@@ -171,7 +189,13 @@
 	        				}
 	        			}
 	        		}
-	        	}
+				}//Press space to transform small letter keyword to capital letter
+				else if(e.keyCode == 32){
+    				if(keywords.indexOf(last_word.toUpperCase()) >= 0){
+    					editor.getDoc().setValue(editor.getDoc().getValue().replace(last_word, last_word.toUpperCase()));
+    					editor.setCursor(editor.lineCount(), 0);
+    				}
+        		}
 			});
 
 	        function showPigHelper(){
@@ -230,7 +254,7 @@
 					'#mode' : 'Choose local/mapreduce mode',
 					'#createScriptButton' : 'New Button enables to create a new Pig script!',
 					'#saveScriptButton' : 'Save Button enables to save an existed Pig script!',
-					'#resetinputarea' : 'Reset Button enables to empty the Pig text area below!',
+					'#resetinputButton' : 'Reset Button enables to empty the Pig text area below!',
 					'#downloadOutputButton' : 'Download Output Button enables you to download the output not until the Pig script execution is finished!',
 					'#downloadProgressLog' : 'Download ProgressLog Button enables to downlaod the progress log not until the Pig script execution is finished!',
 					'#queryhistory_navbar' : 'Query History helps you visualize the previous Pig script information!',
@@ -238,6 +262,7 @@
 					'#about_navbar' : 'Nan Wang -- Imperial College London -- 2014',
 					'#executeButton' : 'Execute Button enables you to launch the execution of the Pig script!',
 					'#killButton' : 'Kill Button enables you to stop the execution of the running Pig script!',
+					'#explainButton' : 'Explain Button provide information on how a pig query will be executed!',
 					'#logButton' : 'This Button enables you to show/hide the progress log area!',
 					'#outputButton' : 'Open Output Button enables you to show/hide the output area!',
 					'#searchform' : 'Search widget helps you find the specific pig script!',
@@ -472,6 +497,8 @@
 			       
 			        string += '</tr>';
 			        $('#stateLog').html(string);
+				}else if(data.notification == 'explain'){
+					$('#explainarea').html(data.plan);
 				}else{
 					string += '<tr>';
 			        string += '<td>' + data.operation + '</td>';
@@ -485,26 +512,31 @@
 				
 				if(mode == 'mapreduce'){
 					for(var i in mapreduceprogressRecord){
-					$('#map_' + mapreduceprogressRecord[i]).css('width', '100%');
-					$('#reduce_' + mapreduceprogressRecord[i]).css('width', '100%');
-					$('#map_' + mapreduceprogressRecord[i]).html('Map 100%');
-					$('#reduce_' + mapreduceprogressRecord[i]).html('Reduce 100%');
+						$('#map_' + mapreduceprogressRecord[i]).css('width', '100%');
+						$('#reduce_' + mapreduceprogressRecord[i]).css('width', '100%');
+						$('#map_' + mapreduceprogressRecord[i]).html('Map 100%');
+						$('#reduce_' + mapreduceprogressRecord[i]).html('Reduce 100%');
 					}
 				}
 			}
 
 			//Get data from server
 	        socket.on('notification', function (data) {
-	        	var notifications = data.split('\n');
-	        	for(var i in notifications){
-	        	 	if(i != notifications.length - 1){
-	        	 		var tcpData = JSON.parse(notifications[i]);
-	        	 		if(!kill){
-	        	 			coordinate(tcpData);
-	        	 		}
-	        	 	}
+	        	if(type == 'script'){
+	        		var notifications = data.split('\n');
+		        	for(var i in notifications){
+		        	 	if(i != notifications.length - 1){
+		        	 		var tcpData = JSON.parse(notifications[i]);
+		        	 		if(!kill){
+		        	 			coordinate(tcpData);
+		        	 		}
+		        	 	}
+		        	}
+	        	}else if(type == 'explain'){
+	        		var tcpData = JSON.parse(data);
+	        		coordinate(tcpData);
 	        	}
-	       	});
+			});
 
 	        var totalPageNumber;
 	        var scripts;
@@ -654,7 +686,9 @@
 
 			//execute script
 			var line_clause = {};
+			var type;
 			function executeScript(){
+				type = 'script';
 				reset();
 				kill = false;
 
@@ -679,8 +713,8 @@
 					alert('No mode selected!');
 				}else{
 					var data = {'name': selectedScript,
-								'mode': $('#ModeText').text().trim()
-						   	   }
+								'mode': mode
+						   	   };
 					
 					socket.emit('execute', data);
 				}
@@ -691,6 +725,23 @@
 				kill = true;
 				socket.emit('kill', 'kill');
 				reset();
+			}
+
+			//explain the specific alias
+			function explainAlias(){
+				type = 'explain';
+				var mode = $('#ModeText').text().trim();
+				if(selectedScript == ''){
+					alert('No script selected!');
+				}else if(mode == 'Mode'){
+					alert('No mode selected!');
+				}else{
+					var data = {'name': selectedScript,
+								'mode': mode
+						   	   };
+					
+					socket.emit('explain', data);
+				}
 			}
 
 			function reset(){
@@ -709,7 +760,6 @@
 				mapreduceprogressRecord = [];
 			}
 
-
 			//open state log
 			function openStateLog(){
 				$('#progressLog').slideToggle();
@@ -720,12 +770,23 @@
 				}
 			}
 
+			//Open output log
 			function openOutputLog(){
 				$('#result').slideToggle();
 				if($('#outputButton').text().trim() == 'Open Output'){
 					$('#outputButton').html('Close Output <i class="icon-folder-close icon-white"></i>');
 				} else{
 					$('#outputButton').html('Open Output <i class="icon-folder-open icon-white"></i>');
+				}
+			}
+
+			//Open explain log
+			function openExplainLog(){
+				$('#explainlog').slideToggle();
+				if($('#explainLogButton').text().trim() == 'Open ExplainLog'){
+					$('#explainLogButton').html('Close ExplainLog <i class="icon-folder-close icon-white"></i>');
+				} else{
+					$('#explainLogButton').html('Open ExplainLog <i class="icon-folder-open icon-white"></i>');
 				}
 			}
 
@@ -816,22 +877,24 @@
 				res += '<span id="historycurrentPage"></span>/<span id="historytotalPage"></span>';
 				res += '<button class="btn btn-primary" onclick="historyNextPage()"><i class="icon-arrow-right icon-white"></i></button></div>';
 				res += '<div><table class="table table-striped table-condensed">';
-				res += '<thead><tr><td style="text-align:center;">#</td><td style="text-align:center;">name</td><td style="text-align:center;">uuid</td><td style="text-align:center;">time</td><td style="text-align:center;">state</td><td style="text-align:center;">Output</td><td style="text-align:center;">ProgressLog</td></tr></thead><tbody>';
+				res += '<thead><tr><td style="text-align:center;">#</td><td style="text-align:center;">Name</td><td style="text-align:center;">UUID</td><td style="text-align:center;">Time</td><td style="text-align:center;">State</td><td style="text-align:center;">Output</td><td style="text-align:center;">ProgressLog</td><td style="text-align:center;">ExplainLog</td></tr></thead><tbody>';
 				for(var i in data){
 					res += '<tr style="height:4%;">';
-					res += '<td style="text-align:center;">' + data[i].id + '</td>';
-					res += '<td style="text-align:center;word-break:break-all;">' + data[i].name + '</td>';
+					res += '<td style="text-align:center;width:8%;">' + data[i].id + '</td>';
+					res += '<td style="text-align:center;word-break:break-all;width:12%;">' + data[i].name + '</td>';
 
-					res += '<td style="text-align:center;">' + data[i].script_uuid + '</td>';
-					res += '<td style="text-align:center;">' + data[i].time + '</td>';
+					res += '<td style="text-align:center;width:25%;">' + data[i].script_uuid + '</td>';
+					res += '<td style="text-align:center;width:15%;">' + data[i].time + '</td>';
 					if(data[i].state == 'Fail'){
 						res += '<td style="text-align:center;"><span class="label label-important" style="height:65%;padding-top:7%;font-size:12pt;">' + data[i].state + '</span></td>';
 						res += '<td style="text-align:center;"><button class="btn btn-danger">ErrorLog<i class="icon-download-alt icon-white"></i></button></td>';
-						res += '<td style="text-align:center;"><button class="btn btn-warning" disabled>ProgressLog <i class="icon-download-alt icon-white"></i></button></td></tr>';
+						res += '<td style="text-align:center;width:11%;"><button class="btn btn-warning" disabled>ProgressLog <i class="icon-download-alt icon-white"></i></button></td>';
+						res += '<td style="text-align:center;width:11%;"><button class="btn btn-info" disabled>ExplainLog <i class="icon-download-alt icon-white"></i></button></td></tr>'
 					}else{
-						res += '<td style="text-align:center;"><span class="label label-success" style="height:65%;padding-top:7%;font-size:12pt;text-align:center;">' + data[i].state + '</span></td>';
-						res += '<td style="text-align:center;"><button class="btn btn-primary" name="' + data[i].script_uuid + '" onclick="downloadHistoryOutput(this.name)">Output <i class="icon-download-alt icon-white"></i></button></td>';
-						res += '<td style="text-align:center;"><button class="btn btn-warning">ProgressLog <i class="icon-download-alt icon-white"></i></button></td></tr>';
+						res += '<td style="text-align:center;width:8%;"><span class="label label-success" style="height:65%;padding-top:7%;font-size:12pt;text-align:center;">' + data[i].state + '</span></td>';
+						res += '<td style="text-align:center;width:10%;"><button class="btn btn-primary" name="' + data[i].script_uuid + '" onclick="downloadHistoryOutput(this.name)">Output <i class="icon-download-alt icon-white"></i></button></td>';
+						res += '<td style="text-align:center;width:11%;"><button class="btn btn-warning">ProgressLog <i class="icon-download-alt icon-white"></i></button></td>';
+						res += '<td style="text-align:center;width:11%;"><button class="btn btn-info">ExplainLog <i class="icon-download-alt icon-white"></i></button></td></tr>'
 					}
 				}
 				res += '</tbody></table></div></div>';

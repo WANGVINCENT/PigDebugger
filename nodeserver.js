@@ -56,7 +56,6 @@ var tcpServer = net.createServer(function(socket) {
 var httpServer = http.createServer(function(req, res) {
 	
 	console.log("request received from: " + req.connection.remoteAddress);
-	console.log(global.output);
 
   	var filePath = req.url;
   	
@@ -139,14 +138,14 @@ io.sockets.on('connection', function (socket) {
       	wstream.end();
 
       	scripts = fs.readdirSync(__dirname+'/scripts/');
-      	socket.emit('scriptNames',scripts);
+      	socket.emit('scriptNames', scripts);
     });
 
 	//delete pig script
     socket.on('deleteFile', function(data){
     	fs.unlinkSync(__dirname+'/scripts/'+data);
     	scripts = fs.readdirSync(__dirname+'/scripts/');
-    	socket.emit('scriptNames',scripts);
+    	socket.emit('scriptNames', scripts);
     });
 
     //select file and send back script content
@@ -172,8 +171,8 @@ io.sockets.on('connection', function (socket) {
     	executionString += host + ' ';
     	executionString += tcpPort + ' ';
     	executionString += 'script';
-    	
     	exec = process.exec(executionString, puts);
+    	console.log(executionString);
     });
 
     //kill pig process
@@ -182,6 +181,25 @@ io.sockets.on('connection', function (socket) {
 		process.exec('kill -9 ' + pid);
     });
 
+    socket.on('explain', function(data){
+    	httpSocket = socket;
+
+    	var explainString = '';
+    	explainString = 'java -Xmx512m -Xms256m -cp ' + __dirname + '/bin';
+    	explainString += ':' + __dirname + '/bin/hibernate/*';
+    	if(data.mode == 'mapreduce'){
+    		explainString += ':$HADOOPDIR';
+    	}
+    	explainString += ' Main'; 
+    	explainString += ' ' + data.mode;
+    	explainString += ' ' + __dirname + '/scripts/' + data.name + '.pig ';
+    	explainString += host + ' ';
+    	explainString += tcpPort + ' ';
+    	explainString += 'explain';
+    	exec = process.exec(explainString, puts);
+    	console.log(explainString);
+	});
+
     socket.on('downloadOutput', function(data){
     	output = data.result;
     	uuid = data.uuid;
@@ -189,7 +207,6 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on('downloadHistoryOutput', function(data){
 		uuid = data;
-		console.log(uuid);
 		getHistoryOutput(socket, uuid);
 	});
 
@@ -233,7 +250,6 @@ function getHistoryOutput(socket, uuid){
 		  		output = rows[0].output.toString().replace(/\[/g, "(");
 		  		output = output.replace(/\]/g, ')');
 		  		output = output.replace(/-/g, '\n');
-		  		console.log(output);
 		  		socket.emit('outputDone','outputDone');
 		  	}
   		});
