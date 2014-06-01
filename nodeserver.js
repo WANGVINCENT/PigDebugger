@@ -16,6 +16,7 @@ var uuid;
 var tcpPort = 6969;
 var httpPort = 8080;
 var host = 'localhost';
+var db_name = 'pig_latin_debugger';
 
 /*
 ***************************************mysql_dbpool*********************************************
@@ -32,10 +33,13 @@ var pool =  mysql.createPool({
 	host: host,
     user: 'root',
     password: 'root',
-    database: 'test',
+    database: db_name,
     port: 3306,
     multipleStatements:true
 });	
+
+createDatabase(db_name);
+createTable('users');
 
 /*
 **************************************TCP SERVER*************************************************
@@ -57,11 +61,11 @@ var httpServer = http.createServer(function(req, res) {
 	
 	console.log("request received from: " + req.connection.remoteAddress);
 
-  	var filePath = req.url;
-  	
-    if (filePath == '/' || filePath == '/index.html')
-		filePath = __dirname + '/index.html';
-	
+	var filePath = req.url;
+	if(filePath == '/index.html' || filePath == '/'){
+    	filePath = __dirname + '/index.html';
+    }
+
 	//Allow download of output file
 	if (filePath == '/download.html'){
 		res.setHeader('Content-disposition', 'attachment; filename=' + uuid + '.txt');
@@ -97,7 +101,7 @@ var httpServer = http.createServer(function(req, res) {
 				fs.readFile(filePath, function(error, content) {
 					if (error) {
 						res.writeHead(500);
-						resp.end();
+						res.end();
 					} else {
 
 						if(contentType == 'text/html'){
@@ -233,8 +237,6 @@ function puts(error, stdout, stderr)
 	sys.puts(stdout);
 }
 
-//createDatabase('test');
-
 var historyRecordPerPage = 12;
 function getHistoryTable(socket, historycurrentPage){
 	var start = (parseInt(historycurrentPage) - 1) * historyRecordPerPage;
@@ -310,22 +312,6 @@ function getExplainLog(socket, uuid){
 	});
 }
 
-/*
-function getJob(uuid){
-	var query = 'SELECT * FROM output WHERE ?';
-	var filter = { script_uuid : uuid };
-	pool.getConnection(function(err, connection){
-  		connection.query(query, filter, function(err, rows){
-		  	if(err) {
-		  		throw err;
-		  	}else {
-		  		console.log(rows);
-	  		}
-  		});
-  		connection.release();
-	});
-}
-
 function createDatabase(db_name){
 	var query = "CREATE DATABASE IF NOT EXISTS " + db_name;
 	connection.connect();
@@ -334,5 +320,24 @@ function createDatabase(db_name){
 	  		throw err;
 	  	}
   	});
+  	connection.end(function(err){
+  		console.log('Database ' + db_name + ' has been successfully created!');
+	});
 }
-*/
+
+function createTable(table){
+	var query = 'CREATE TABLE IF NOT EXISTS ' + table + '(';
+	query += 'id INT NOT NULL AUTO_INCREMENT, username VARCHAR(256) NOT NULL UNIQUE, password VARCHAR(256) NOT NULL, PRIMARY KEY(id))';
+
+	pool.getConnection(function(err, connection){
+  		connection.query(query, function(err, rows){
+		  	if(err) {
+		  		throw err;
+		  	}
+  		});
+  		connection.release();
+	});
+}
+
+
+

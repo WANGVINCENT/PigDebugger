@@ -91,7 +91,7 @@
 				<button class="btn btn-primary" id="logButton" onclick="openStateLog()">Open ProgressLog <i class="icon-folder-open icon-white"></i></button>
 				<button class="btn btn-info" id="explainLogButton" onclick="openExplainLog()">Open ExplainLog <i class="icon-folder-open icon-white"></i></button>
 			</div>
-			<span id="success" class="label label-default">State</span>
+			<span id="success" style="cursor: pointer;" class="label label-default">State</span>
 			
 			<div id="logcontainer">
 				
@@ -257,16 +257,19 @@
 					'#resetinputButton' : 'Reset Button enables to empty the Pig text area below!',
 					'#downloadOutputButton' : 'Download Output Button enables you to download the output not until the Pig script execution is finished!',
 					'#downloadProgressLog' : 'Download ProgressLog Button enables to downlaod the progress log not until the Pig script execution is finished!',
+					'#downloadExplainLogButton' : 'Download ExplainLog Button enables to download the MapReduce plan of the Pig script!',
 					'#queryhistory_navbar' : 'Query History helps you visualize the previous Pig script information!',
 					'#terminal_navbar' : 'Terminal helps you interact with console!',
 					'#about_navbar' : 'Nan Wang -- Imperial College London -- 2014',
 					'#executeButton' : 'Execute Button enables you to launch the execution of the Pig script!',
 					'#killButton' : 'Kill Button enables you to stop the execution of the running Pig script!',
 					'#explainButton' : 'Explain Button provide information on how a pig query will be executed!',
-					'#logButton' : 'This Button enables you to show/hide the progress log area!',
-					'#outputButton' : 'Open Output Button enables you to show/hide the output area!',
+					'#logButton' : 'This Button enables you to show/hide the progresslog area!',
+					'#outputButton' : 'This Button enables you to show/hide the output area!',
+					'#explainLogButton' : 'This Button enables you to show/hide the explainlog area',
 					'#searchform' : 'Search widget helps you find the specific pig script!',
-					'#progressBar' : 'Progress bar!'
+					'#progressBar' : 'Progress bar!',
+					'#success' : 'This indicates if the execution of the Pig script succeeds or fails!'
 				}
 
 				for(var i in tip_array){
@@ -414,7 +417,6 @@
 					    setTimeout(function(){
 					        $('#map_'+data.jobid).css('width', '25%');
 					        $('#map_'+data.jobid).html('Map 25%');
-					        //$('#stateLog').html(string);
 					        for(var i in mapreduceprogressRecord){
 								$('#map_' + mapreduceprogressRecord[i]).css('width', '100%');
 								$('#reduce_' + mapreduceprogressRecord[i]).css('width', '100%');
@@ -743,6 +745,7 @@
 
 			//explain the specific alias
 			function explainAlias(){
+				reset();
 				type = 'explain';
 				var mode = $('#ModeText').text().trim();
 				if(selectedScript == ''){
@@ -875,7 +878,7 @@
 			function setPigTerminal(node){
 				$('#navtab').children().removeClass('active');
 				$(node).parent().addClass('active');
-				$('#pigbody').html('<iframe src="http://' + host + ':4200"></iframe><div id="terminalfoot">Author : Nan Wang - Imperial College London</div><br />');
+				$('#pigbody').html('<iframe src="http://' + host + ':4200"></iframe><div id="terminalfoot">Author : Nan Wang - Imperial College London - 2014</div><br />');
 			}
 
 			//Query History
@@ -935,7 +938,7 @@
 					}
 				}
 				res += '</tbody></table></div></div>';
-				res += '<div id="terminalfoot">Author : Nan Wang - Imperial College London</div><br />'
+				res += '<div id="terminalfoot">Author : Nan Wang - Imperial College London - 2014</div><br />'
 				$('#pigbody').html(res);
 				if(historytotalPage == 0){
 					historycurrentPage = 0;
