@@ -15,6 +15,7 @@
 		<ul id="navtab" class="nav nav-pills">
 		  	<li class="active"><a href="/">Pig</a></li>
 			<li><a id="queryhistory_navbar" style="cursor: pointer;" onclick="setHistory(this)">Query History</a></li>
+			<li><a id="hdfs_navbar" style="cursor: pointer;" onclick="setHDFS(this)">HDFS</a></li>
 			<li><a id="terminal_navbar" style="cursor: pointer;" onclick="setPigTerminal(this)">Terminal</a></li>
 			<li><a id="about_navbar" style="cursor: pointer;">About Author</a></li>
 		</ul>
@@ -259,6 +260,7 @@
 					'#downloadProgressLog' : 'Download ProgressLog Button enables to downlaod the progress log not until the Pig script execution is finished!',
 					'#downloadExplainLogButton' : 'Download ExplainLog Button enables to download the MapReduce plan of the Pig script!',
 					'#queryhistory_navbar' : 'Query History helps you visualize the previous Pig script information!',
+					'#hdfs_navbar': 'HDFS authorizes to view and manage HDFS files!',
 					'#terminal_navbar' : 'Terminal helps you interact with console!',
 					'#about_navbar' : 'Nan Wang -- Imperial College London -- 2014',
 					'#executeButton' : 'Execute Button enables you to launch the execution of the Pig script!',
@@ -274,7 +276,7 @@
 
 				for(var i in tip_array){
 					$(i).attr('title', tip_array[i]);
-					if(i == '#queryhistory_navbar' || i == '#terminal_navbar' || i == '#about_navbar'){
+					if(i == '#queryhistory_navbar' || i == '#terminal_navbar' || i == '#about_navbar' || i == '#hdfs_navbar'){
 						$(i).attr('data-placement', 'bottom');
 					}
 					$(i).tooltip();
@@ -945,6 +947,69 @@
 				}
 				$('#historycurrentPage').html(historycurrentPage);
 				$('#historytotalPage').html(historytotalPage);
+			}
+
+			socket.on('stdout', function(data){
+				showHDFS(data);
+			});
+
+			function setHDFS(node){
+				$('#navtab').children().removeClass('active');
+				$(node).parent().addClass('active');
+				socket.emit('getHDFSfiles', 'getfiles');
+			}
+
+			function showHDFS(data){
+				var data = data.split('\n');
+				var new_data = [];
+				for(var i in data){
+					var elements = data[i].split(' ');
+					var new_elements = [];
+					for(var j in elements){
+						if(elements[j].trim() != ''){
+							new_elements.push(elements[j]);
+						}
+					}
+					new_data.push(new_elements);
+				}
+				new_data.pop();
+
+				res = '';
+				res += '<div class="container well" id="hdfs">';
+				res += '<div style="position:relative;left:3%;"><button class="btn btn-success" onclick="Upload()" style="position:absolute;width:8%;left:-1%">Upload <i class="icon-upload icon-white"></i></button><input id="upload" type="file" name="image"/></div>';
+				res += '<div><table class="table table-striped table-condensed" style="position:relative;top:2%;">';
+				res += '<thead><tr><td>#</td><td>Files</td><td>Permissions</td><td>User</td><td>Group</td><td>Size</td><td>Date</td><td>Time</td><td>Delete</td></tr></thead><tbody>';
+				var count = 0;
+				for(var i in new_data){
+					if(new_data[i][4] != '0'){
+						res += '<tr>';
+						res += '<td>' + (++count) + '</td>';
+						res += '<td>' + new_data[i][7] + '</td>';
+						res += '<td>' + new_data[i][0] + '</td>';
+						res += '<td>' + new_data[i][2] + '</td>';
+						res += '<td>' + new_data[i][3] + '</td>';
+						res += '<td>' + new_data[i][4] + '</td>';
+						res += '<td>' + new_data[i][5] + '</td>'; 
+						res += '<td>' + new_data[i][6] + '</td>';
+						res += '<td><button name="' + new_data[i][7] + '" class="btn btn-danger" onclick="deleteHDFSFile(this.name)"><i class="icon-trash icon-white"</i></button></td>'; 
+						res += '</tr>';
+					}
+				}
+				res += '</tbody></table></div></div>';
+
+				$('#pigbody').html(res + '<div id="terminalfoot">Author : Nan Wang - Imperial College London - 2014</div><br />');
+			}
+
+			function Upload(){
+				$( "#upload").trigger( "click" );
+			}
+
+			socket.on('deleteHDFSFileDone', function(data){
+				socket.emit('getHDFSfiles', 'getfiles');
+			});
+			
+			function deleteHDFSFile(file){
+				socket.emit('deleteHDFSFile', file);
 			}
 
 			socket.on('getResultFromDb', function(data){

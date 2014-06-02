@@ -230,6 +230,17 @@ io.sockets.on('connection', function (socket) {
     socket.on('historycurrentPage', function(data){
     	getHistoryTable(socket, data);
     });
+
+    socket.on('getHDFSfiles', function(data){
+		exec = process.exec('/usr/local/hadoop/bin/hadoop dfs -lsr', function(error, stdout, stderr){
+    		socket.emit('stdout', stdout);
+    	});
+	});
+
+	socket.on('deleteHDFSFile', function(data){
+		exec = process.exec('/usr/local/hadoop/bin/hadoop dfs -rm ' + data);
+		socket.emit('deleteHDFSFileDone', 'deleteHDFSFileDone');
+	});
 });
 
 function puts(error, stdout, stderr) 

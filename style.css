@@ -373,6 +373,14 @@ iframe
 	left: 1%;
 }
 
+#hdfs{
+	position: absolute;
+	width: 95%;
+	height: 73%;
+	top: 15%;
+	left: 1%;
+}
+
 #historypager
 {
 	position: relative;
