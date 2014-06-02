@@ -66,7 +66,7 @@ var httpServer = http.createServer(function(req, res) {
 
 	switch(filePath){
 		case '/':
-			filePath = __dirname + '/html/test.html';
+			filePath = __dirname + '/html/index.html';
 			break;
 		case '/history':
 			filePath = __dirname + '/html/history.html';
