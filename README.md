@@ -16,5 +16,5 @@ Launch
 ======
 To launch the server, run the script in the root project folder :
     
-    node main.sh
+    node main.js
 
