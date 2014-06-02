@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Pig Latin Debugger</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <title>Sign in · Twitter Bootstrap</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <!-- Le styles -->
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/bootstrap-responsive.min.css">
+        <style type="text/css">
+            body {
+                padding-top: 40px;
+                padding-bottom: 40px;
+                background-color: #f5f5f5;
+            }
+
+            .form-signin {
+                max-width: 300px;
+                padding: 19px 29px 29px;
+                margin: 0 auto 20px;
+                background-color: #fff;
+                border: 1px solid #e5e5e5;
+                -webkit-border-radius: 5px;
+                   -moz-border-radius: 5px;
+                        border-radius: 5px;
+                -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+                   -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+                        box-shadow: 0 1px 2px rgba(0,0,0,.05);
+            }
+            
+            .form-signin .form-signin-heading,
+            .form-signin .checkbox {
+                margin-bottom: 10px;
+            }
+            
+            .form-signin input[type="text"],
+            .form-signin input[type="password"] {
+                font-size: 16px;
+                height: auto;
+                margin-bottom: 15px;
+                padding: 7px 9px;
+            }
+
+            #pigicon
+            {
+                position: absolute;
+                width: 3%;
+                height: 5%;
+                top:10%;
+                left: 35%;
+            }
+
+            #title{
+                position: absolute;
+                left: 39%;
+                top:8.6%;
+            }
+
+            #loginin{
+                position: absolute;
+                background-color: white;
+                top: 23%;
+                left: 36.5%;
+                width: 26%;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <h1 id="title" style="color:purple;font-family:Helvetica;">Pig Latin Debugger</h1>
+        <img id="pigicon" src="img/pig.jpeg" />
+
+        <div class="container well" id="loginin">
+            <h2 class="form-signin-heading">Please sign in</h2>
+            <input class="input-block-level" placeholder="Username" id="username" type="text">
+            <input class="input-block-level" placeholder="HADOOPDIR" id="hadoopdir" type="text">
+            <button onclick="sendLogin()" class="btn btn-large btn-primary">Sign in</button>
+            
+        </div>
+        <script src="socket.io/socket.io.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script type="text/javascript">
+            var host = '146.169.44.198';
+            var socket = io.connect('http://' + host + ':8080');
+
+            function sendLogin(){
+                var username = $('#username').val();
+                var hadoopdir = $('#hadoopdir').val();
+                var credential = {
+                    username : username,
+                    hadoopdir : hadoopdir
+                };
+                if(username.trim() == '' || hadoopdir.trim() == ''){
+                    alert('Please type in your name and configure HADOOPDIR!');
+                }else{
+                    socket.emit('credential' , credential);
+                }
+            }
+
+            socket.on('login', function(data){
+                if(data == 'success'){
+                    window.location.href = "index.html";
+                }
+            });
+
+        </script>
+    </body>
+</html>

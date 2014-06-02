@@ -27,6 +27,7 @@ article > h2:first-child, section:first-child > h2 { margin-top: 0; }
 a, a:visited, a:link, .quasilink {
   color: #A21313;
   text-decoration: none;
+  font-size: 11pt;
 }
 
 em {

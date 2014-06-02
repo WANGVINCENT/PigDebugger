@@ -6,6 +6,7 @@ var url = require("url");
 var sys = require('sys')
 var process = require('child_process');
 var mysql = require('mysql');
+var multipart = require("multipart");
 
 var exec;
 var tcpData;
@@ -62,9 +63,24 @@ var httpServer = http.createServer(function(req, res) {
 	console.log("request received from: " + req.connection.remoteAddress);
 
 	var filePath = req.url;
-	if(filePath == '/index.html' || filePath == '/'){
-    	filePath = __dirname + '/index.html';
-    }
+
+	switch(filePath){
+		case '/':
+			filePath = __dirname + '/html/test.html';
+			break;
+		case '/history':
+			filePath = __dirname + '/html/history.html';
+			break;
+		case '/hdfs':
+			if(req.headers['content-length'] > 500){
+				upload_file(req, res);
+			}
+			filePath = __dirname + '/html/hdfs.html';
+			break;
+		case '/terminal':
+			filePath = __dirname + '/html/terminal.html';
+			break;
+	}
 
 	//Allow download of output file
 	if (filePath == '/download.html'){
@@ -94,6 +110,10 @@ var httpServer = http.createServer(function(req, res) {
 				contentType = 'image/png';
 				filePath = __dirname + filePath;
 				break;
+			case '.gif':
+				contentType = 'image/gif';
+				filePath = __dirname + filePath;
+				break;
 		}
 		
 		fs.exists(filePath, function(exists) {
@@ -103,10 +123,6 @@ var httpServer = http.createServer(function(req, res) {
 						res.writeHead(500);
 						res.end();
 					} else {
-
-						if(contentType == 'text/html'){
-							var test = content.toString().match(/^.*(script).*$/);
-						}
 						res.writeHead(200, { 'Content-Type': contentType });
 						res.write(content, 'utf-8');
 
@@ -120,6 +136,89 @@ var httpServer = http.createServer(function(req, res) {
 		});
 	}
 }).listen(httpPort);
+
+/*
+ * Create multipart parser to parse given request
+ */
+function parse_multipart(req) {
+    var parser = multipart.parser();
+
+    // Make parser use parsed request headers
+    parser.headers = req.headers;
+
+    // Add listeners to request, transfering data to parser
+
+    req.addListener("data", function(chunk) {
+        parser.write(chunk);
+    });
+
+    req.addListener("end", function() {
+        parser.close();
+    });
+
+    return parser;
+}
+
+/*
+ * Handle file upload
+ */
+function upload_file(req, res) {
+    // Request body is binary
+    req.setEncoding("binary");
+
+    // Handle request as multipart
+    var stream = parse_multipart(req);
+
+    var fileName = null;
+    var fileStream = null;
+    var name = null;
+
+    // Set handler for a request part received
+    stream.onPartBegin = function(part) {
+        sys.debug("Started part, name = " + part.name + ", filename = " + part.filename);
+
+        name = part.filename;
+
+        // Construct file name
+        fileName = __dirname + "/files/" + stream.part.filename;
+
+        // Construct stream used to write to file
+        fileStream = fs.createWriteStream(fileName);
+
+        // Add error handler
+        fileStream.addListener("error", function(err) {
+            sys.debug("Got error while writing to file '" + fileName + "': ", err);
+        });
+
+        // Add drain (all queued data written) handler to resume receiving request data
+        fileStream.addListener("drain", function() {
+            req.resume();
+        });
+    };
+
+    // Set handler for a request part body chunk received
+    stream.onData = function(chunk) {
+        // Pause receiving request data (until current chunk is written)
+        //req.pause();
+
+        // Write chunk to file
+        // Note that it is important to write in binary mode
+        // Otherwise UTF-8 characters are interpreted
+        sys.debug("Writing chunk");
+        fileStream.write(chunk, "binary");
+    };
+
+    // Set handler for request completed
+    stream.onEnd = function() {
+    	fileStream.end();
+		upload_complete(res, name);
+    };
+}
+
+function upload_complete(res, name) {
+    sys.debug("Request complete");
+    exec = process.exec('/usr/local/hadoop/bin/hadoop dfs -copyFromLocal ' + __dirname + '/files/' + name + ' /user/hduser/tsv/' + name, puts);
+}
 
 /*
 ********************************SOCKET IO******************************************

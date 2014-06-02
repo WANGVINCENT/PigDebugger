@@ -16,3 +16,4 @@ cd /home/hduser/PigDebugger/shellinabox-2.14
 ./configure
 sudo make
 sudo make install
+

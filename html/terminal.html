@@ -1,0 +1,76 @@
+<html>
+	<head>
+		<title>Pig Latin Debugger</title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="css/bootstrap-responsive.min.css">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<h1 id="title" style="color:purple;font-family:Helvetica;">Pig Latin Debugger</h1>
+		<h4 id="date" style="color:0000CC;"></h4>
+		<img id="pigicon" src="img/pig.jpeg" />
+		<ul id="navtab" class="nav nav-pills">
+		  	<li><a href="/">Pig</a></li>
+			<li><a id="queryhistory_navbar" href=" history"style="cursor: pointer;">Query History</a></li>
+			<li><a id="hdfs_navbar" href="/hdfs" style="cursor: pointer;">HDFS</a></li>
+			<li class="active"><a id="terminal_navbar" href="/terminal" style="cursor: pointer;">Terminal</a></li>
+			<li><a id="about_navbar" style="cursor: pointer;">About Author</a></li>
+		</ul>
+		<div id="pigbody">
+			<iframe id="iframe"></iframe>
+			<div id="terminalfoot">Author : Nan Wang - Imperial College London - 2014</div><br />
+		</div>
+
+		<script src="socket.io/socket.io.js"></script>
+        <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	    <script src="../js/bootstrap.min.js" type="text/javascript"></script>
+
+	    <script>
+			var host = '146.169.44.198';
+			var socket = io.connect('http://' + host + ':8080');
+
+	        $(function(){
+				$('#date').html((new Date()).toString().split(' ').splice(1,3).join('-'));
+
+		      	showToolTip();
+
+				$('#iframe').attr('src', 'http://' + host + ':4200')
+			});
+
+	       function showToolTip(){
+				var tip_array = {
+					'#helper' : 'Pig Helper helps you find the needed Pig Operators!',
+					'#tip' : 'Type at least 3 letters and press shift to enable autocompletion!',
+					'#mode' : 'Choose local/mapreduce mode',
+					'#createScriptButton' : 'New Button enables to create a new Pig script!',
+					'#saveScriptButton' : 'Save Button enables to save an existed Pig script!',
+					'#resetinputButton' : 'Reset Button enables to empty the Pig text area below!',
+					'#downloadOutputButton' : 'Download Output Button enables you to download the output not until the Pig script execution is finished!',
+					'#downloadProgressLog' : 'Download ProgressLog Button enables to downlaod the progress log not until the Pig script execution is finished!',
+					'#downloadExplainLogButton' : 'Download ExplainLog Button enables to download the MapReduce plan of the Pig script!',
+					'#queryhistory_navbar' : 'Query History helps you visualize the previous Pig script information!',
+					'#hdfs_navbar': 'HDFS authorizes to view and manage HDFS files!',
+					'#terminal_navbar' : 'Terminal helps you interact with console!',
+					'#about_navbar' : 'Nan Wang -- Imperial College London -- 2014',
+					'#executeButton' : 'Execute Button enables you to launch the execution of the Pig script!',
+					'#killButton' : 'Kill Button enables you to stop the execution of the running Pig script!',
+					'#explainButton' : 'Explain Button provide information on how a pig query will be executed!',
+					'#logButton' : 'This Button enables you to show/hide the progresslog area!',
+					'#outputButton' : 'This Button enables you to show/hide the output area!',
+					'#explainLogButton' : 'This Button enables you to show/hide the explainlog area',
+					'#searchform' : 'Search widget helps you find the specific pig script!',
+					'#progressBar' : 'Progress bar!',
+					'#success' : 'This indicates if the execution of the Pig script succeeds or fails!'
+				}
+
+				for(var i in tip_array){
+					$(i).attr('title', tip_array[i]);
+					if(i == '#queryhistory_navbar' || i == '#terminal_navbar' || i == '#about_navbar' || i == '#hdfs_navbar'){
+						$(i).attr('data-placement', 'bottom');
+					}
+					$(i).tooltip();
+				}
+			}
+		</script>
+    </body>
+</html>
