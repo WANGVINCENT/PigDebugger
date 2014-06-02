@@ -8,11 +8,11 @@ Configuration
   
 To configure, please run the script in the configuration folder :
     
-    sh config.sh 
+    sh PigDebugger-config.sh 
     
 Launch
 ======
 To launch the server, run the script in the root project folder :
     
-    node nodeserver.sh
+    node main.sh
 
