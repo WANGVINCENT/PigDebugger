@@ -1,0 +1,422 @@
+a, a:visited, a:link, .quasilink 
+{
+  	color: #A21313;
+  	text-decoration: none; 
+  	font-size: 10pt;
+  	font-family:  Helvetica;
+}
+
+
+#title{
+	position: absolute;
+	left: 10%;
+}
+
+#date
+{
+	position: absolute;
+	left: 89%;
+	top:2%;
+}
+
+#pigicon
+{
+	position: absolute;
+	width: 3%;
+	height: 5%;
+	top:1.6%;
+	left: 6%;
+}
+
+#navtab
+{
+	position:absolute;
+	top:9%;
+	left: 2%;
+}
+
+/**************************************scripts zone ***************************************/
+#scriptZone
+{
+	position:absolute;
+	top: 20%;
+	left: 2%;
+	width: 21%;
+	height: 66%;
+}
+
+#searchform
+{
+	position:absolute;
+	top: 2.5%;
+	width: 60%;
+	height: 30%;
+}
+
+#search
+{
+	height: 17%;
+	width: 128%;
+}
+
+#turnpage
+{
+	position:absolute;
+	left: 60%;
+	top: 6%;
+}
+
+#scriptFiles
+{
+	position:absolute;
+	top:15%;
+	width: 92%;
+	left: 5%;
+	font-size: 9pt;
+}
+
+/******************************************pig helper******************************************/
+#tip
+{
+	position: absolute;
+	top:16%;
+	left:19.7%;
+}
+
+#parameter
+{
+	position: absolute;
+	top:14.5%;
+	left:27%;
+	width: 25%;
+}
+
+#helper
+{
+	position: relative;
+	display: inline;
+	top:0%;
+	left:0%;
+}
+
+#mode
+{
+	position: relative;
+	display: inline;
+	top:0%;
+	left:3%;
+}
+
+/*
+#hadoopdirdiv
+{
+	position: relative;
+	display: inline;
+	top:15%;
+	left:-10%;
+}
+
+#hadoopdir
+{
+	height: 6%;
+}
+*/
+
+#buttongroup1
+{
+	position: absolute;
+	top:14.5%;
+	left:46%;	
+	width: 40%;
+}
+
+#executeButton
+{
+	position: relative;
+	top:0%;
+	left:0%;
+	width:19%;
+}
+
+#killButton
+{
+	position: absolute;
+	top:0%;
+	left:22%;
+	width:13%;
+}
+
+#explainButton
+{
+	position: absolute;
+	top:0%;
+	left:38%;
+	width:18%;
+}
+
+
+
+/*******************************************script input zone***********************************/
+#input{
+	position:absolute;
+	top:20%;
+	left:27%;
+	width:68%;
+	height: 66%;
+}
+
+#scriptName
+{
+	position: absolute;
+	top: 2%;
+	left: 2%;
+}
+
+#scriptNameInput
+{
+	position: absolute;
+	top: 2%;
+	left: 2%;
+	height:5.5%;
+	width: 24%;
+}
+
+#createScriptButton
+{
+	position: absolute;
+	top: 2%;
+	left: 28%;
+	width: 8%;
+	height:5.5%;
+}
+
+#saveScriptButton
+{
+	position: absolute;
+	top: 2%;
+	left: 38%;
+	width: 9%;
+	height:5.5%;
+}
+
+#resetinputButton
+{
+	position: absolute;
+	top: 2%;
+	left: 49%;
+	width: 14%;
+	height:5.5%;
+}
+
+#scriptinputarea
+{
+	position:absolute;
+	left:3.6%;
+	top:2%;
+	width: 97%;
+	height: 99%; 
+	overflow-y: scroll;
+}
+
+.cm-s-default 
+{
+	position:relative;
+	left: -2%;
+	top:6%;
+	height: 110%;
+}
+
+.CodeMirror-code{
+	font-size: 9pt;
+}
+
+#progressBar
+{
+	position:absolute;
+	width:98%;
+	top:94%;
+	left:1%;
+}
+
+/***********************************************buttongroup****************************************/
+#buttongroup2
+{
+	position: absolute;
+	top:93%;
+	left:6%;
+	width: 94%;
+}
+
+#downloadOutputButton
+{
+	position: absolute;
+	top:0%;
+	left:0%;
+	width:13%;
+}
+
+#downloadProgressLogButton
+{
+	position: absolute;
+	top:0%;
+	left:15%;
+	width:16%;
+}
+
+#downloadExplainLogButton
+{
+	position: absolute;
+	top:0%;
+	left:33%;
+	width:15%;	
+}
+
+#outputButton
+{
+	position: absolute;
+	top:0%;
+	left:50%;
+	width:11%;
+}
+
+#logButton
+{
+	position: absolute;
+	top:0%;
+	left:63%;
+	width:14%;
+}
+
+#explainLogButton
+{
+	position: absolute;
+	top:0%;
+	left:79%;
+	width:13%;
+}
+
+#success
+{
+	position: absolute;
+	font-size: 18px;
+	top:15%;
+	left:91%;
+	width:5.7%;
+	height: 2.2%;
+	text-align:center;
+}
+
+/*********************************************log zone***********************************************/
+#logcontainer{
+	position:absolute;
+	top: 100%;
+	left: 2%;
+	width: 93%;
+}
+
+#result{
+	position:relative;
+	display: none;
+	top: 0%;
+	left: 0%;
+	width: 100%;
+}
+
+#progressLog
+{
+	position:relative;
+	display: none;
+	top: 0%;
+	left: 0%;
+	width: 100%;
+}
+
+#explainlog
+{
+	position:relative;
+	display: none;
+	top: 0%;
+	left: 0%;
+	width: 100%;
+}
+
+#resultarea
+{
+	position:relative;
+	width: 100%;
+	height: 400px;
+	overflow:scroll;
+}
+
+#explainarea
+{
+	position:relative;
+	width: 100%;
+	height: 400px;
+	overflow:scroll;
+}
+
+#terminalfoot
+{
+	position: absolute;
+	top:95%;
+	width: 100%;
+	text-align:center;
+}
+
+iframe
+{
+	position: absolute;
+	width: 98%;
+	height: 78%;
+	top: 15%;
+	left: 1%;
+}
+
+#history
+{
+	position: absolute;
+	width: 95%;
+	height: 73%;
+	top: 15%;
+	left: 1%;
+}
+
+#hdfs{
+	position: absolute;
+	width: 95%;
+	height: 73%;
+	top: 15%;
+	left: 1%;
+}
+
+#historypager
+{
+	position: relative;
+	top:0%;
+	left: 85%;
+	width: 11%;
+}
+
+#progressBarBackup
+{
+	position: fixed;
+	left:65%;
+	bottom:0px;
+	width: 33%;
+	display: none;
+}
+
+#outputlabel{
+	font-style:normal;
+	position:relative;
+	left:47%;
+	width: 5%;
+}
+
+#explainlabel{
+	font-style:normal;
+	position:relative;
+	left:47%;
+	width: 7%;
+}
