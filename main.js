@@ -20,7 +20,7 @@ var host = 'localhost';
 var db_name = 'pig_latin_debugger';
 
 /*
-***************************************mysql_dbpool*********************************************
+*******************************************************mysql_dbpool*********************************************
 */
 
 var connection =  mysql.createConnection({
@@ -43,7 +43,7 @@ createDatabase(db_name);
 createTable('users');
 
 /*
-**************************************TCP SERVER*************************************************
+*******************************************************TCP SERVER*************************************************
 */
 var tcpServer = net.createServer(function(socket) {
 	
@@ -56,11 +56,11 @@ var tcpServer = net.createServer(function(socket) {
 }).listen(tcpPort, host);
 
 /*
-**************************************HTTP SERVER***************************************************
+****************************************************HTTP SERVER***************************************************
 */
 var httpServer = http.createServer(function(req, res) {
 	
-	console.log("request received from: " + req.connection.remoteAddress);
+	sys.debug("Request received from: " + req.connection.remoteAddress);
 
 	var filePath = req.url;
 
@@ -147,8 +147,7 @@ function parse_multipart(req) {
     parser.headers = req.headers;
 
     // Add listeners to request, transfering data to parser
-
-    req.addListener("data", function(chunk) {
+	req.addListener("data", function(chunk) {
         parser.write(chunk);
     });
 
@@ -198,9 +197,6 @@ function upload_file(req, res) {
 
     // Set handler for a request part body chunk received
     stream.onData = function(chunk) {
-        // Pause receiving request data (until current chunk is written)
-        //req.pause();
-
         // Write chunk to file
         // Note that it is important to write in binary mode
         // Otherwise UTF-8 characters are interpreted
@@ -216,17 +212,19 @@ function upload_file(req, res) {
 }
 
 function upload_complete(res, name) {
-    sys.debug("Request complete");
+    sys.debug('Uploading to HDFS...');
     exec = process.exec('/usr/local/hadoop/bin/hadoop dfs -copyFromLocal ' + __dirname + '/files/' + name + ' /user/hduser/tsv/' + name, puts);
+    sys.debug("Uploading complete!");
 }
 
 /*
-********************************SOCKET IO******************************************
+********************************************************SOCKET IO**************************************************
 */
 var io = require('socket.io').listen(httpServer);
 
 io.sockets.on('connection', function (socket) {
 	
+	sys.debug('Launch terminal!');
 	var openTerminal = 'shellinaboxd --css=\'' + __dirname + '/shellinabox-2.14/shellinabox/white-on-black.css\'';
 	process.exec(openTerminal, puts);
 
@@ -242,6 +240,7 @@ io.sockets.on('connection', function (socket) {
 
       	scripts = fs.readdirSync(__dirname+'/scripts/');
       	socket.emit('scriptNames', scripts);
+      	sys.debug('Script saved!');
     });
 
 	//delete pig script
@@ -249,6 +248,7 @@ io.sockets.on('connection', function (socket) {
     	fs.unlinkSync(__dirname+'/scripts/'+data);
     	scripts = fs.readdirSync(__dirname+'/scripts/');
     	socket.emit('scriptNames', scripts);
+    	sys.debug('Script deleted!');
     });
 
     //select file and send back script content
@@ -274,11 +274,13 @@ io.sockets.on('connection', function (socket) {
     	executionString += host + ' ';
     	executionString += tcpPort + ' ';
     	executionString += 'script';
+    	sys.debug('Execute the script!');
     	exec = process.exec(executionString, puts);
     });
 
     //kill pig process
     socket.on('kill', function(data){
+    	sys.debug('Kill the execution!');
     	var pid = exec.pid + 1
 		process.exec('kill -9 ' + pid);
     });
@@ -298,6 +300,7 @@ io.sockets.on('connection', function (socket) {
     	explainString += host + ' ';
     	explainString += tcpPort + ' ';
     	explainString += 'explain';
+    	sys.debug('Explain the script!');
     	exec = process.exec(explainString, puts);
 	});
 
@@ -431,7 +434,7 @@ function createDatabase(db_name){
 	  	}
   	});
   	connection.end(function(err){
-  		console.log('Database ' + db_name + ' has been successfully created!');
+  		sys.debug('Database ' + db_name + ' has been successfully created!');
 	});
 }
 

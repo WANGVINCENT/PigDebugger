@@ -117,8 +117,8 @@ function showPigHelper(){
 
 function showToolTip(){
 	var tip_array = {
-		'#helper' : 'Pig Helper helps you find the needed Pig Operators!',
-		'#tip' : 'Type at least 3 letters and press shift to enable autocompletion!',
+		'#helper' : 'Pig Helper helps you find the needed Pig operators!',
+		'#tip' : 'Type at least the first 3 letters of the Pig operators and press shift to enable autocompletion!',
 		'#mode' : 'Choose local/mapreduce mode',
 		'#createScriptButton' : 'New Button enables to create a new Pig script!',
 		'#saveScriptButton' : 'Save Button enables to save an existed Pig script!',
