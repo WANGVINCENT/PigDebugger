@@ -104,7 +104,19 @@
 			}
 
 			socket.on('stdout', function(data){
-				transformData(data);
+				if(data == 'delete'){
+					alert('File has been deleted!');
+
+					for(var i=0;i<new_data.length;i++){
+						if(new_data[i][7] == deleteFile){
+							new_data.splice(i, 1);
+							break;
+						}
+					}
+					showHDFS();
+				}else{
+					transformData(data);
+				}
 			});
 
 			function setHDFS(node){
@@ -119,6 +131,7 @@
 			var new_data = [];
 			function transformData(data){
 				var data = data.split('\n');
+				new_data = [];
 
 				for(var i in data){
 					var elements = data[i].split(' ');
@@ -181,12 +194,10 @@
 				$('.table').hide();
 			}
 
-			socket.on('deleteHDFSFileDone', function(data){
-				socket.emit('getHDFSfiles', 'getfiles');
-			});
-
+			var deleteFile;
 			function deleteHDFSFile(file){
 				socket.emit('deleteHDFSFile', file);
+				deleteFile = file;
 			}
 
 			function hdfsLastPage(){
