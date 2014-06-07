@@ -647,6 +647,11 @@ function reset(){
 	mapreduceprogressRecord = [];
 	$( "div.CodeMirror-code").children().css("background-color", "white");
 	fail = false;
+	alias = {};
+	line_clause = {};
+	running = false;
+	jobsCount = 0;
+	kill = false;
 }
 
 //open state log
