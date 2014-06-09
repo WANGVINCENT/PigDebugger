@@ -361,6 +361,7 @@ function coordinate(data){
 			alias[i] = aliasArray[i].split(',');
 		}
 
+		console.log(alias);
 		string += '<tr>';
         string += '<td>' + data.operation + '</td>';
         mode = data.mode;

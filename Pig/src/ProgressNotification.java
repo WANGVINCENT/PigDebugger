@@ -26,7 +26,6 @@ import org.apache.pig.tools.pigstats.PigProgressNotificationListener;
 import org.apache.pig.tools.pigstats.ScriptState;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.stringtemplate.v4.compiler.STParser.ifstat_return;
 
 /**
  * This class implements a Pig API PigProgressNotificationListener class which feeds back
@@ -120,11 +119,12 @@ public class ProgressNotification implements PigProgressNotificationListener{
 				jsonObject.put("mode", mode);
 				jsonObject.put("plan", plan.toString());
 				jsonObject.put("alias", StringUtils.join(aliasList, "+"));
+				client.addMessage(jsonObject.toString());
 			}else{
 				jsonObject.put("notification", "explain");
 				jsonObject.put("plan", plan.toString());
+				client.write(jsonObject.toString());
 			}
-			client.write(jsonObject.toString());
 			
 			//insert mrplan into db
 			dbHandler.insertMRPlan(uuid, plan.toString());
