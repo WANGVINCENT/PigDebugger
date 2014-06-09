@@ -103,7 +103,7 @@
 				res += '<div id="historypager"><button class="btn btn-primary" onclick="historyLastPage()"><i class="icon-arrow-left icon-white"></i></button>';
 				res += '<span id="historycurrentPage"></span>/<span id="historytotalPage"></span>';
 				res += '<button class="btn btn-primary" onclick="historyNextPage()"><i class="icon-arrow-right icon-white"></i></button></div>';
-				res += '<div><table class="table table-striped table-condensed">';
+				res += '<div><table class="table table-striped table-condensed" style="font-size:10pt;">';
 				res += '<thead><tr><td style="text-align:center;">#</td><td style="text-align:center;">Name</td><td style="text-align:center;">UUID</td><td style="text-align:center;">Time</td><td style="text-align:center;">State</td><td style="text-align:center;">Output</td><td style="text-align:center;">ProgressLog</td><td style="text-align:center;">ExplainLog</td></tr></thead><tbody>';
 				for(var i in data){
 					res += '<tr style="height:4%;">';

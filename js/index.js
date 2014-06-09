@@ -39,7 +39,7 @@ editor.on('keyup', function(cm, e) {
 	var keywords = ['FOREACH', 'GENERATE', 'LIMIT', 'GROUP', 'STORE', 'TOKENIZE', 'EXPLAIN', 'ILLUSTRATE', 'DESCRIBE', 'IMPORT', 'CONCAT', 
 				'COUNT', 'DISTINCT', 'FILTER', 'FLOOR', 'RANDOM', 'ROUND', 'TOTUPLE', 'TOBAG', 'TOMAP', 'INDEXOF', 'REPLACE', 'REGEX_EXTRACT',
 				'LOWER', 'LAST_INDEX_OF', 'REGEX_EXTRACT_ALL', 'STRSPLIT', 'SUBSTRING', 'UCFIRST', 'UPPER', 'FLATTEN', 'CROSS', 'ORDER', 
-				'SAMPLE', 'SPLIT', 'UNION', 'COGROUP', 'COUNT_START', 'PARALLEL'];
+				'SAMPLE', 'SPLIT', 'UNION', 'COGROUP', 'COUNT_START', 'PARALLEL', 'DUMP', 'STORE', 'LOAD'];
 
 	var words = editor.getDoc().getValue().split(/[\s\W]+/);
 	var lastword = words.pop();
