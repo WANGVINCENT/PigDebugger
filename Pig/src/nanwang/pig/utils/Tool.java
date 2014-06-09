@@ -35,4 +35,28 @@ public class Tool {
 		String[] list = filePath.split("/");
 		return list[list.length - 1];
 	}
+	
+	/**
+	 * Concatenate the strings
+	 * @param strings
+	 * @return StringBuilder
+	 */
+	public static StringBuilder join(String[] strings){
+		StringBuilder stringBuilder = new StringBuilder();
+		for(String string : strings){
+			if(string != null){
+				stringBuilder.append(string);
+			}
+		}
+		return stringBuilder;
+	}
+	
+	/**
+	 * 
+	 * @param string
+	 * @return
+	 */
+	public static String[] toArray(String string) {
+	    return string == null ? new String[0] : string.trim().split(",");
+	}
 }

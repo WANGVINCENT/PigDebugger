@@ -33,7 +33,15 @@ public class Output {
 	private String state;
 	
 	@Column (name="output", length = 2147483647, columnDefinition="LONGTEXT")
-	private String output;
+	private StringBuilder output;
+	
+	public Output(String uuid, StringBuilder output, String name, String state, String time){
+		this.uuid = uuid;
+		this.output = output;
+		this.name = name;
+		this.state = state;
+		this.time = time;
+	}
 
 	public int getId() {
 		return id;
@@ -51,11 +59,11 @@ public class Output {
 		this.uuid = uuid;
 	}
 
-	public String getOutput() {
+	public StringBuilder getOutput() {
 		return output;
 	}
 
-	public void setOutput(String output) {
+	public void setOutput(StringBuilder output) {
 		this.output = output;
 	}
 	

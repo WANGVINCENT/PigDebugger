@@ -7,13 +7,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 /**
- * This is the Job Entity
+ * This is the MRPlan Entity
  * @author wangnan
  * @since 2014-05-01
  */
 
-@Entity (name="job")
-public class Job {
+@Entity (name="mrplan")
+public class MRPlan {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -23,14 +23,14 @@ public class Job {
 	@Column (name="script_uuid")
 	private String uuid;
 	
-	@Column (name="operation", length = 65535, columnDefinition="TEXT")
-	private String operation;
+	@Column (name="plan", length = 2147483647, columnDefinition="LONGTEXT")
+	private String plan;
 	
-	public Job(String uuid, String operation){
+	public MRPlan(String uuid, String plan){
 		this.uuid = uuid;
-		this.operation = operation;
+		this.plan = plan;
 	}
-	
+
 	public int getId() {
 		return id;
 	}
@@ -46,12 +46,12 @@ public class Job {
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
 	}
-	
-	public String getOperation() {
-		return operation;
+
+	public String getPlan() {
+		return plan;
 	}
 
-	public void setOperation(String operation) {
-		this.operation = operation;
+	public void setPlan(String plan) {
+		this.plan = plan;
 	}
 }

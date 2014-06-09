@@ -1,7 +1,6 @@
 package nanwang.pig.test;
 
 import nanwang.pig.entity.DbHandler;
-import nanwang.pig.entity.Job;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -11,7 +10,7 @@ import org.junit.Test;
 
 public class DbHandlerTest {
 	
-	private DbHandler dbHandler = null;
+	private DbHandler dbHandler;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -32,12 +31,7 @@ public class DbHandlerTest {
 
 	@Test
 	public void test() {
-		Job job = new Job();
-		job.setId(1);
-		job.setOperation("This is the DbHandler test!");
-		job.setUuid("Test uuid");
-		
-		dbHandler.insert(job);
+		dbHandler.insertJob("This is the DbHandler test!", "Test uuid");
 		DbHandler.close();
 	}
 }

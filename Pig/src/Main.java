@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 
-import nanwang.pig.entity.Output;
 import nanwang.pig.entity.DbHandler;
 import nanwang.pig.socket.Client;
 import nanwang.pig.utils.Tool;
@@ -28,15 +27,18 @@ public class Main {
 		int port = Integer.valueOf(args[3]);
 		String type = args[4];
 		
-		/*
-		String mode = "local";
+		/*String mode = "local";
 		String pigname = "test.pig";
 		String ip = "localhost";
 		int port = 6969;
-		String type = "script";
-		*/
+		String type = "script";*/
 		
-		LinkedList<String> parameters = null;
+		LinkedList<String> parameters =  new LinkedList<String>();
+		parameters.add("-x");
+		parameters.add(mode);
+		parameters.add(pigname);
+		
+		String[] commands = parameters.toArray(new String[0]);
 		
 		Client client = new Client(ip, port);
 		
@@ -44,14 +46,7 @@ public class Main {
 		
 		if(type.equals("script")){
 			//run script
-			parameters = new LinkedList<String>();
-			parameters.add("-x");
-			parameters.add(mode);
-			parameters.add(pigname);
-			
-			String[] commands = parameters.toArray(new String[0]);
-	        
-	        PigStats stats = PigRunner.run(commands, new ProgressNotification(client, dbHandler, pigname, mode));
+			PigStats stats = PigRunner.run(commands, new ProgressNotification(client, dbHandler, pigname, mode, type));
 	        if(!stats.isSuccessful()){
 	        	//Send fail message
 				JSONObject jsonObject = new JSONObject();
@@ -63,13 +58,7 @@ public class Main {
 					pigname = Tool.extractPigName(pigname);
 					String time = Tool.getCurrentTime();
 					//Store output into db
-					Output output = new Output();
-					output.setUuid(stats.getScriptId());
-					output.setOutput(stats.getErrorMessage());
-					output.setName(pigname);
-					output.setState("Fail");
-					output.setTime(time);
-					dbHandler.insert(output);
+					dbHandler.insertOutput(stats.getScriptId(), new StringBuilder(stats.getErrorMessage()), pigname, "Fail", time);
 					
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -92,19 +81,7 @@ public class Main {
 	        
 		} else if(type.equals("explain")){
 			//explain
-			parameters = new LinkedList<String>();
-			
-			String operation = "explain -script " + pigname;
-			parameters.add("-x");
-			parameters.add(mode);
-			parameters.add("-e");
-			parameters.add(pigname);
-			parameters.add(operation);
-			
-			String[] commands = parameters.toArray(new String[0]);
-	        
-	        PigStats stats = PigRunner.run(commands, new ProgressNotification(client, dbHandler, pigname, mode));
-	        //stats.getJobGraph().explain(ps, format, verbose);
+			PigRunner.run(commands, new ProgressNotification(client, dbHandler, pigname, mode, type));
 		}
 	}
 }

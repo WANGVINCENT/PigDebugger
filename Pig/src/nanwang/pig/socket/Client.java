@@ -25,9 +25,9 @@ import org.json.JSONTokener;
 
 public class Client{
 	
-	private Socket socket = null;
-	private BufferedReader br = null;
-	private static BufferedWriter bw = null;
+	private Socket socket;
+	private BufferedReader br;
+	private static BufferedWriter bw;
 	//Messages queue
 	private LinkedList<String> messages = new LinkedList<String>();
 	//Execution complete flag

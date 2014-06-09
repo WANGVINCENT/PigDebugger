@@ -72,4 +72,34 @@ public class DbHandler {
     public static void close(){
     	sessionFactory.close();
     }
+    
+    /**
+     * This method is used for inserting a new job object
+     * @param uuid
+     * @param operation
+     */
+    public void insertJob(String uuid, String operation){
+    	insert(new Job(uuid, operation));
+    }
+    
+    /**
+     * This method is used for inserting a new output result
+     * @param uuid
+     * @param output
+     * @param pigname
+     * @param state
+     * @param time
+     */
+    public void insertOutput(String uuid, StringBuilder output, String pigname, String state, String time){
+    	insert(new Output(uuid, output, pigname, state, time));
+    }
+    
+    /**
+     * This method is used for inserting a new mrplan
+     * @param uuid
+     * @param plan
+     */
+    public void insertMRPlan(String uuid, String plan){
+    	insert(new MRPlan(uuid, plan));
+    }
 }
