@@ -40,8 +40,6 @@
 		<img id="pigicon" src="img/pig.jpeg" />
 		<ul id="navtab" class="nav nav-pills">
 		  	<li class="active"><a href="/">Pig</a></li>
-		  	<li><a id="namenode_navbar" data-toggle="modal" href="#namenodeDialog">Name Node UI</a></li>
-		  	<li><a id="jobtracker_navbar" data-toggle="modal" href="#jobtrackerDialog">Job Tracker UI</a></li>
 			<li><a id="queryhistory_navbar" href="/history" style="cursor: pointer;">Query History</a></li>
 			<li><a id="hdfs_navbar" href="/hdfs" style="cursor: pointer;">HDFS</a></li>
 			<li><a id="terminal_navbar" href="/terminal" style="cursor: pointer;">Terminal</a></li>
@@ -101,7 +99,8 @@
 					<iframe id="namenodeiframe" style="position:relative;overflow:scroll;top:0%;width:100%;height:76%;"></iframe>
 				</div>
 				<div class="modal-footer">
-					<a class="btn btn-primary" onclick="$('#namenodeDialog').modal('hide');">Close</a>
+					<a class="btn btn-success" onclick="refreshNameNode()">Refresh</a>
+					<a class="btn btn-danger" onclick="$('#namenodeDialog').modal('hide');">Close</a>
 				</div>
 			</div>
 
@@ -113,7 +112,8 @@
 					<iframe id="jobtrackeriframe" style="position:relative;overflow:scroll;top:0%;width:100%;height:76%;"></iframe>
 				</div>
 				<div class="modal-footer">
-					<a class="btn btn-primary" onclick="$('#jobtrackerDialog').modal('hide');">Close</a>
+					<a class="btn btn-success" onclick="refreshJobTracker()">Refresh</a>
+					<a class="btn btn-danger" onclick="$('#jobtrackerDialog').modal('hide');">Close</a>
 				</div>
 			</div>
 
@@ -121,6 +121,8 @@
 				<button class="btn btn-success" id="executeButton" onclick="executeScript()">Execute <i class="icon-play-circle icon-white"></i></button>
 				<button class="btn btn-danger" id="killButton" onclick="killScript()">Kill <i class="icon-stop icon-white"></i></button>
 				<button class="btn btn-info" id="explainButton" onclick="explainAlias()">Explain <i class="icon-info-sign icon-white"></i></button>
+				<button id="namenodeButton" class='btn btn-primary' data-toggle="modal" href="#namenodeDialog">Name Node UI</button>
+	   			<button id="jobtrackerButton" class='btn btn-warning' data-toggle="modal" href="#jobtrackerDialog">Job Tracker UI</button>
 			</div>
 			
 			<div class="container well" id="input">

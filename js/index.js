@@ -34,9 +34,19 @@ $('#outputButton').attr('disabled', false);
 $('#resetinputButton').attr('disabled', false);
 $('#killButton').attr('disabled', true);
 $('#explainButton').attr('disabled', false);
+$('#namenodeButton').attr('disabled', false);
+$('#jobtrackerButton').attr('disabled', false);
 
 $('#namenodeiframe').attr('src', 'http://' + host + ':50070');
 $('#jobtrackeriframe').attr('src', 'http://' + host + ':50030');
+
+function refreshJobTracker(){
+	$('#jobtrackeriframe').attr('src', 'http://' + host + ':50030');
+}
+
+function refreshNameNode(){
+	$('#namenodeiframe').attr('src', 'http://' + host + ':50070');
+}
 
 
 //script input editor
@@ -137,8 +147,8 @@ function showToolTip(){
 		'#downloadOutputButton' : 'Download Output Button enables you to download the output not until the Pig script execution is finished!',
 		'#downloadProgressLog' : 'Download ProgressLog Button enables to downlaod the progress log not until the Pig script execution is finished!',
 		'#downloadExplainLogButton' : 'Download ExplainLog Button enables to download the MapReduce plan of the Pig script!',
-		'#namenode_navbar' : 'Name Node UI helps you visualize Hadoop NameNode information!',
-		'#jobtracker_navbar' : 'Job Tracker UI helps you visualize Hadoop Job Tracker information!',
+		'#namenode' : 'Name Node UI helps you visualize Hadoop NameNode information!',
+		'#jobtracker' : 'Job Tracker UI helps you visualize Hadoop Job Tracker information!',
 		'#queryhistory_navbar' : 'Query History helps you visualize the previous Pig script information!',
 		'#hdfs_navbar': 'HDFS authorizes to view and manage HDFS files!',
 		'#terminal_navbar' : 'Terminal helps you interact with console!',
@@ -146,6 +156,8 @@ function showToolTip(){
 		'#executeButton' : 'Execute Button enables you to launch the execution of the Pig script!',
 		'#killButton' : 'Kill Button enables you to stop the execution of the running Pig script!',
 		'#explainButton' : 'Explain Button provide information on how a pig query will be executed!',
+		'#namenodeButton': 'Name Node UI helps visualize Hadoop Name Node information!',
+		'#jobtrackerButton' : 'Jot Tracker UI helps visualize Hadoop Job Tracker information!',
 		'#logButton' : 'This Button enables you to show/hide the progresslog area!',
 		'#outputButton' : 'This Button enables you to show/hide the output area!',
 		'#explainLogButton' : 'This Button enables you to show/hide the explainlog area',
@@ -156,7 +168,7 @@ function showToolTip(){
 
 	for(var i in tip_array){
 		$(i).attr('title', tip_array[i]);
-		if(i == '#queryhistory_navbar' || i == '#terminal_navbar' || i == '#about_navbar' || i == '#hdfs_navbar' || i == '#namenode_navbar' || i == '#jobtracker_navbar'){
+		if(i == '#queryhistory_navbar' || i == '#terminal_navbar' || i == '#about_navbar' || i == '#hdfs_navbar'){
 			$(i).attr('data-placement', 'bottom');
 		}
 		$(i).tooltip();
