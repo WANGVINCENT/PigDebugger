@@ -76,12 +76,18 @@ a, a:visited, a:link, .quasilink
 }
 
 /******************************************pig helper******************************************/
-
-#tip
+#UDFJar
 {
 	position: absolute;
-	top:16%;
-	left:19.7%;
+	top:14.5%;
+	left:20%;
+}
+
+#UDFButton
+{
+	position: absolute;
+	top:14.5%;
+	left:11%;
 }
 
 #parameter

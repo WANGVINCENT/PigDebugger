@@ -31,6 +31,7 @@ showToolTip();
 $('#downloadOutputButton').attr('disabled', true);
 $('#downloadProgressLogButton').attr('disabled', true);
 $('#outputButton').attr('disabled', false);
+$('#executeButton').attr('disabled', false);
 $('#resetinputButton').attr('disabled', false);
 $('#killButton').attr('disabled', true);
 $('#explainButton').attr('disabled', false);
@@ -47,7 +48,6 @@ function refreshJobTracker(){
 function refreshNameNode(){
 	$('#namenodeiframe').attr('src', 'http://' + host + ':50070');
 }
-
 
 //script input editor
 var editor = CodeMirror.fromTextArea($('#scriptinputarea')[0], {
@@ -138,6 +138,8 @@ function showPigHelper(){
 
 function showToolTip(){
 	var tip_array = {
+		'#UDFButton' : 'Upload UDF Button helps upload customized user defined functions!',
+		'#UDFJar' : 'UDFs enables you to select the specific UDF jar!', 
 		'#helper' : 'Pig Helper helps you find the needed Pig operators!',
 		'#tip' : 'Type at least the first 3 letters of the Pig operators and press shift to enable autocompletion!',
 		'#mode' : 'Choose local/mapreduce mode',
@@ -178,6 +180,32 @@ function showToolTip(){
 function selectHelperFunction(value){
 	editor.getDoc().setValue(editor.getDoc().getValue() + value);
 	editor.setCursor(editor.lineCount(), 0);
+}
+
+//Get UDF names from server
+socket.on('udfNames', function(data){
+	showUDFs(data);
+	UDF_dirname = data.dirname;
+});
+
+var UDF_dirname;
+function showUDFs(data){
+	var res = '';
+	var UDFs = data.UDFs;
+	for(var i in UDFs){
+		res += '<li><a tabindex="-1" onclick="selectUDF(this.innerHTML)">' + UDFs[i] + '</a></li>';
+	}
+	$('#udf').html(res);
+}
+
+function selectUDF(udf){
+	editor.getDoc().setValue(editor.getDoc().getValue() + 'REGISTER \'' + UDF_dirname + '/UDFs/' + udf + '\';');
+	editor.setCursor(editor.lineCount(), 0);
+}
+
+function startUpload(){
+	$('#spin').show();
+	$('.table').hide();
 }
 
 $('#search').keyup(function(){
@@ -451,92 +479,92 @@ var totalPageNumber;
 var scripts;
 var itemNumber = 11;
 //Get script names
-	socket.on('scriptNames', function(data) {
-		scripts = data;
-		totalPageNumber = Math.ceil(data.length / itemNumber);
-		if(currentPageNumber > totalPageNumber){
-			currentPageNumber = 1;
-		}
-		$('#totalPage').html(totalPageNumber);
-		$('#currentPage').html(currentPageNumber);
-		showScripts();
-	});
-
-	//Get script content
-	socket.on('scriptContent', function(data){
-		editor.getDoc().setValue(data);
-	});
-
-	function transformOutput(data)
-	{
-		var list = data.split('-');
-		for(var i=0;i<list.length;i++){
-			list[i] = list[i].toString().replace("null","");
-			list[i] = list[i].toString().replace("[","(");
-			list[i] = list[i].toString().replace("]",")");
-			output += list[i] + '\n';
-		}
-	}
-
-	var currentPageNumber = 1;
-	//show scripts table
-	function showScripts()
-	{
-		var res = '';
-		count = (currentPageNumber-1)*itemNumber + 1;
-		var min;
-		if(currentPageNumber==totalPageNumber && scripts.length%itemNumber!=0){
-			min = scripts.length - 1;
-		}else{
-			min = currentPageNumber*itemNumber-1;
-		}
-
-		for(var i=(currentPageNumber-1)*itemNumber;i<=min;i++)
-		{
-			res += '<tr style="height:5%;">';
-			res += '<td class="span1">' + count + '</td>';
-		res += '<td class="span4" style="word-break:break-all;">' + scripts[i] + '</td>';
-		res += '<td><button name="' + scripts[i] + '" class="btn btn-danger" onclick="deleteScript(this.name)"><i class="icon-trash icon-white"</i></button></td>';
-		res += '<td><button name="' + scripts[i] + '" id="' + scripts[i].substring(0, scripts[i].length-4) + '" class="btn btn-warning" onclick="selectScript(this.id)"><i class="icon-file icon-white"</i></button></td>';
-			res += '</tr>';
-			count++;
-	}
-	
-		$('#scripttable').html(res);
-		$('#'+selectedScript).attr('class','btn btn-success');
-	$('#'+selectedScript).html('<i class="icon-ok-circle icon-white"></i>');
-	}
-
-	//show script when search is launched
-	function filterScripts(data)
-	{
+socket.on('scriptNames', function(data) {
+	scripts = data;
+	totalPageNumber = Math.ceil(data.length / itemNumber);
+	if(currentPageNumber > totalPageNumber){
 		currentPageNumber = 1;
-		totalPageNumber = Math.ceil(data.length / itemNumber);
-		$('#currentPage').html(currentPageNumber);
-		$('#totalPage').html(totalPageNumber);
+	}
+	$('#totalPage').html(totalPageNumber);
+	$('#currentPage').html(currentPageNumber);
+	showScripts();
+});
 
-		var res = '';
-		count = (currentPageNumber-1)*itemNumber + 1;
-		var min;
-		if(currentPageNumber==totalPageNumber && data.length%itemNumber!=0){
-			min = data.length - 1;
-		}else{
-			min = currentPageNumber*itemNumber-1;
-		}
-		
-		for(var i=(currentPageNumber-1)*itemNumber;i<=min;i++)
-		{
-			res += '<tr style="height:5%;">';
-			res += '<td class="span1">' + count + '</td>';
-		res += '<td class="span8" style="word-break:break-all;">' + data[i] + '</td>';
-		res += '<td><button name="' + data[i] + '" class="btn btn-danger" onclick="deleteScript(this.name)"><i class="icon-trash icon-white"</i></button></td>';
-		res += '<td><button name="' + data[i] + '" id="' + data[i].substring(0, data[i].length-4) + '" class="btn btn-warning" onclick="selectScript(this.id)"><i class="icon-file icon-white"</i></button></td>';
-			res += '</tr>';
-			count++;
+//Get script content
+socket.on('scriptContent', function(data){
+	editor.getDoc().setValue(data);
+});
+
+function transformOutput(data)
+{
+	var list = data.split('-');
+	for(var i=0;i<list.length;i++){
+		list[i] = list[i].toString().replace("null","");
+		list[i] = list[i].toString().replace("[","(");
+		list[i] = list[i].toString().replace("]",")");
+		output += list[i] + '\n';
+	}
+}
+
+var currentPageNumber = 1;
+//show scripts table
+function showScripts()
+{
+	var res = '';
+	count = (currentPageNumber-1)*itemNumber + 1;
+	var min;
+	if(currentPageNumber==totalPageNumber && scripts.length%itemNumber!=0){
+		min = scripts.length - 1;
+	}else{
+		min = currentPageNumber*itemNumber-1;
+	}
+
+	for(var i=(currentPageNumber-1)*itemNumber;i<=min;i++)
+	{
+		res += '<tr style="height:5%;">';
+		res += '<td class="span1">' + count + '</td>';
+	res += '<td class="span4" style="word-break:break-all;">' + scripts[i] + '</td>';
+	res += '<td><button name="' + scripts[i] + '" class="btn btn-danger" onclick="deleteScript(this.name)"><i class="icon-trash icon-white"</i></button></td>';
+	res += '<td><button name="' + scripts[i] + '" id="' + scripts[i].substring(0, scripts[i].length-4) + '" class="btn btn-warning" onclick="selectScript(this.id)"><i class="icon-file icon-white"</i></button></td>';
+		res += '</tr>';
+		count++;
+}
+
+	$('#scripttable').html(res);
+	$('#'+selectedScript).attr('class','btn btn-success');
+$('#'+selectedScript).html('<i class="icon-ok-circle icon-white"></i>');
+}
+
+//show script when search is launched
+function filterScripts(data)
+{
+	currentPageNumber = 1;
+	totalPageNumber = Math.ceil(data.length / itemNumber);
+	$('#currentPage').html(currentPageNumber);
+	$('#totalPage').html(totalPageNumber);
+
+	var res = '';
+	count = (currentPageNumber-1)*itemNumber + 1;
+	var min;
+	if(currentPageNumber==totalPageNumber && data.length%itemNumber!=0){
+		min = data.length - 1;
+	}else{
+		min = currentPageNumber*itemNumber-1;
 	}
 	
-		$('#scripttable').html(res);
-	}
+	for(var i=(currentPageNumber-1)*itemNumber;i<=min;i++)
+	{
+		res += '<tr style="height:5%;">';
+		res += '<td class="span1">' + count + '</td>';
+	res += '<td class="span8" style="word-break:break-all;">' + data[i] + '</td>';
+	res += '<td><button name="' + data[i] + '" class="btn btn-danger" onclick="deleteScript(this.name)"><i class="icon-trash icon-white"</i></button></td>';
+	res += '<td><button name="' + data[i] + '" id="' + data[i].substring(0, data[i].length-4) + '" class="btn btn-warning" onclick="selectScript(this.id)"><i class="icon-file icon-white"</i></button></td>';
+		res += '</tr>';
+		count++;
+}
+
+	$('#scripttable').html(res);
+}
 
 //save script
 function createScript(){

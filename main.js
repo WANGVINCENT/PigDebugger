@@ -7,6 +7,7 @@ var sys = require('sys')
 var process = require('child_process');
 var mysql = require('mysql');
 var multipart = require("multipart");
+var querystring = require("querystring");
 
 var exec;
 var tcpData;
@@ -73,12 +74,18 @@ var httpServer = http.createServer(function(req, res) {
 			break;
 		case '/hdfs':
 			if(req.headers['content-length'] > 500){
-				upload_file(req, res);
+				upload_file(req, res, 'hdfs');
 			}
 			filePath = __dirname + '/html/hdfs.html';
 			break;
 		case '/terminal':
 			filePath = __dirname + '/html/terminal.html';
+			break;
+		case '/udf':
+			if(req.headers['content-length'] > 500){
+				upload_file(req, res, 'udf');
+			}
+			filePath = __dirname + '/html/index.html';
 			break;
 	}
 
@@ -161,7 +168,7 @@ function parse_multipart(req) {
 /*
  * Handle file upload
  */
-function upload_file(req, res) {
+function upload_file(req, res, type) {
     // Request body is binary
     req.setEncoding("binary");
 
@@ -179,9 +186,13 @@ function upload_file(req, res) {
         name = part.filename;
 
         // Construct file name
-        fileName = __dirname + "/files/" + stream.part.filename;
-
-        // Construct stream used to write to file
+        if(type == 'hdfs'){
+        	fileName = __dirname + "/files/" + stream.part.filename;
+        }else if(type == 'udf'){
+        	fileName = __dirname + "/UDFs/" + stream.part.filename;
+        }
+        
+		// Construct stream used to write to file
         fileStream = fs.createWriteStream(fileName);
 
         // Add error handler
@@ -207,13 +218,15 @@ function upload_file(req, res) {
     // Set handler for request completed
     stream.onEnd = function() {
     	fileStream.end();
-		upload_complete(res, name);
-    };
+    	upload_complete(res, name, type);
+	};
 }
 
-function upload_complete(res, name) {
-    sys.debug('Uploading to HDFS...');
-    exec = process.exec('/usr/local/hadoop/bin/hadoop dfs -copyFromLocal ' + __dirname + '/files/' + name + ' /user/hduser/tsv/' + name, puts);
+function upload_complete(res, name, type) {
+    if(type == 'hdfs'){
+    	sys.debug('Uploading to HDFS...');
+    	exec = process.exec('/usr/local/hadoop/bin/hadoop dfs -copyFromLocal ' + __dirname + '/files/' + name + ' /user/hduser/tsv/' + name, puts);
+    }
     sys.debug("Uploading complete!");
 }
 
@@ -224,6 +237,7 @@ var io = require('socket.io').listen(httpServer);
 
 io.sockets.on('connection', function (socket) {
 	
+	//Open terminal
 	sys.debug('Launch terminal!');
 	var openTerminal = 'shellinaboxd --css=\'' + __dirname + '/shellinabox-2.14/shellinabox/white-on-black.css\'';
 	process.exec(openTerminal, puts);
@@ -231,6 +245,14 @@ io.sockets.on('connection', function (socket) {
 	//Get pig script names in 'scripts' directory
 	var scripts = fs.readdirSync(__dirname+'/scripts/');
 	socket.emit('scriptNames', scripts);
+
+	//Get UDF names in 'udfs' directory
+	var UDFs = fs.readdirSync(__dirname+'/UDFs/');
+	var UDFMessage = {
+		'UDFs' : UDFs,
+		'dirname' : __dirname
+	}
+	socket.emit('udfNames', UDFMessage);
 
 	//Save pig script
 	socket.on('saveFile', function (data) {
