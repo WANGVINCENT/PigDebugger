@@ -364,7 +364,7 @@ a, a:visited, a:link, .quasilink
 	text-align:center;
 }
 
-iframe
+#iframe
 {
 	position: absolute;
 	width: 98%;

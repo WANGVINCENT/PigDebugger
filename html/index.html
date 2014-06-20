@@ -13,6 +13,24 @@
 			  font-family: Helvetica;
 			  font-size: 10pt;
 			}
+
+			#namenodeDialog{
+				width: 96%;
+				left: 24%;
+				height: 95%;
+				top:3%;
+			}
+
+			#jobtrackerDialog{
+				width: 96%;
+				left: 24%;
+				height: 95%;
+				top:3%;
+			}
+
+			.modal-body{
+				max-height: 95%;
+			}
 		</style>
 	</head>
 	<body>
@@ -22,6 +40,8 @@
 		<img id="pigicon" src="img/pig.jpeg" />
 		<ul id="navtab" class="nav nav-pills">
 		  	<li class="active"><a href="/">Pig</a></li>
+		  	<li><a data-toggle="modal" href="#namenodeDialog">Name Node UI</a></li>
+		  	<li><a data-toggle="modal" href="#jobtrackerDialog">Job Tracker UI</a></li>
 			<li><a id="queryhistory_navbar" href="/history" style="cursor: pointer;">Query History</a></li>
 			<li><a id="hdfs_navbar" href="/hdfs" style="cursor: pointer;">HDFS</a></li>
 			<li><a id="terminal_navbar" href="/terminal" style="cursor: pointer;">Terminal</a></li>
@@ -63,7 +83,7 @@
 					    Mode
 					    <span class="caret"></span>
 					</a>
-					<ul id="modeSelector" class="dropdown-menu">
+					<ul id="modeSelector" style="cursor: pointer;" class="dropdown-menu">
 						<li><a tabindex="-1" onclick="setMode(this.innerHTML)">local</a></li>
 						<li><a tabindex="-1" onclick="setMode(this.innerHTML)">mapreduce</a></li>
 					</ul>
@@ -71,6 +91,30 @@
 				<!--<div id="hadoopdirdiv">
 					<input id="hadoopdir" type="text" placeholder="Hadoop Dir" />
 				</div>-->
+			</div>
+
+			<div style="display: none;" id="namenodeDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="windowTitleLabel" aria-hidden="true">
+				<div class="modal-header">
+					<h3>Name Node UI</h3>
+				</div>
+				<div class="modal-body" style="overflow-y: hidden;">
+					<iframe id="namenodeiframe" style="position:relative;overflow:scroll;top:0%;width:100%;height:76%;"></iframe>
+				</div>
+				<div class="modal-footer">
+					<a class="btn" onclick="$('#namenodeDialog').modal('hide');">Close</a>
+				</div>
+			</div>
+
+			<div style="display: none;" id="jobtrackerDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="windowTitleLabel" aria-hidden="true">
+				<div class="modal-header">
+					<h3>Job Tracker UI</h3>
+				</div>
+				<div class="modal-body" style="overflow-y: hidden;">
+					<iframe id="jobtrackeriframe" style="position:relative;overflow:scroll;top:0%;width:100%;height:76%;"></iframe>
+				</div>
+				<div class="modal-footer">
+					<a class="btn" onclick="$('#jobtrackerDialog').modal('hide');">Close</a>
+				</div>
 			</div>
 
 			<div id="buttongroup1">
@@ -133,9 +177,11 @@
         <script src="socket.io/socket.io.js" type="text/javascript"></script>
         <script src="http://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
 	    <script src="../js/bootstrap.min.js" type="text/javascript"></script>
+	    <script src="../js/bootstrap-transition.js" type="text/javascript"></script>
+		<script src="../js/bootstrap-modal.js" type="text/javascript"></script>
 	    <script src="../js/viewport.js" type="text/javascript"></script>
 	    <script src="../codemirror/lib/codemirror.js" type="text/javascript"></script>
 		<script src="../codemirror/mode/pig/pig.js" type="text/javascript"></script>
 		<script src="../js/index.js" type="text/javascript"></script>
-    </body>
+	</body>
 </html>

@@ -273,7 +273,9 @@ io.sockets.on('connection', function (socket) {
     	executionString += ' ' + __dirname + '/scripts/' + data.name + '.pig ';
     	executionString += host + ' ';
     	executionString += tcpPort + ' ';
-    	executionString += 'script';
+    	executionString += 'script ';
+    	executionString += __dirname + '/pig.properties'
+    	console.log(executionString);
     	sys.debug('Execute the script!');
     	exec = process.exec(executionString, puts);
     });
@@ -304,9 +306,8 @@ io.sockets.on('connection', function (socket) {
     	exec = process.exec(explainString, puts);
 	});
 
-    socket.on('downloadOutput', function(data){
-    	output = data.result;
-    	uuid = data.uuid;
+    socket.on('getOutput', function(data){
+    	getOutput(socket, data);
 	});
 
 	socket.on('downloadProgressLog', function(data){
@@ -351,7 +352,7 @@ function puts(error, stdout, stderr)
 	sys.puts(stdout);
 }
 
-var historyRecordPerPage = 12;
+var historyRecordPerPage = 11;
 function getHistoryTable(socket, historycurrentPage){
 	var start = (parseInt(historycurrentPage) - 1) * historyRecordPerPage;
 	 
@@ -364,6 +365,28 @@ function getHistoryTable(socket, historycurrentPage){
 		  		var result = {'items': rows[0], 'number': rows[1]};
 		  		socket.emit('result', result);
 	  		}
+  		});
+  		connection.release();
+	});
+}
+
+function getOutput(socket, data){
+	var query = 'SELECT output FROM output WHERE ?';
+	var filter = {script_uuid : data.uuid};
+	pool.getConnection(function(err, connection){
+  		connection.query(query, filter, function(err, rows){
+		  	if(err) {
+		  		throw err;
+		  	}else {
+		  		if(data.type == 'output'){
+		  			output = rows[0].output.toString().replace(/\[/g, "(");
+			  		output = output.replace(/\]/g, ')');
+			  		output = output.replace(/-/g, '\n');
+			  	}else{
+		  			output = rows[0].output.toString();
+		  		}
+		  		socket.emit('sendOutput', output);
+		  	}
   		});
   		connection.release();
 	});

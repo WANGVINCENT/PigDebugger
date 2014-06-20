@@ -6,6 +6,15 @@ var output = '';
 $(function(){
 	$('#date').html((new Date()).toString().split(' ').splice(1,3).join('-'));
 
+	$('#namenodeDialog').bind('show', function () {
+		document.getElementById ("xlInput").value = document.title;
+	});
+	$('#jobtrackerDialog').bind('show', function () {
+		document.getElementById ("xlInput").value = document.title;
+	});
+
+
+
     //When scroll window, if main progressBar is out of view, progressBarBackup shows up
 	$(window).scroll(function() {
 		if($("div#progressBar:in-viewport").length == 0){
@@ -27,6 +36,10 @@ $(function(){
 	$('#killButton').attr('disabled', true);
 	$('#explainButton').attr('disabled', false);
 });
+
+$('#namenodeiframe').attr('src', 'http://' + host + ':50070');
+$('#jobtrackeriframe').attr('src', 'http://' + host + ':50030');
+
 
 //script input editor
 var editor = CodeMirror.fromTextArea($('#scriptinputarea')[0], {
@@ -214,9 +227,13 @@ function coordinate(data){
 				$('#progressionBackup').html('99%');
 			}
 		}
-	} else if(data.notification == 'output'){
-		transformOutput(data.result);
 	} else if(data.notification == 'success'){
+		var getOutput = {
+			uuid : currentScriptUUID,
+			type : 'output'
+		};
+		socket.emit('getOutput', getOutput);
+
 		$('#success').attr('class','label label-success');
 		$('#success').html('Succeed');
 		$('#progression').css('width','100%');
@@ -395,6 +412,10 @@ function coordinate(data){
 		}
 	}
 }
+
+socket.on('sendOutput', function(data){
+	$('#resultarea').html(data);
+});
 
 //Get data from server
 socket.on('notification', function (data) {
@@ -689,15 +710,18 @@ function selectMode(value){
 	$('#modebutton').html(value);
 }
 
+socket.on('getResultFromDb', function(data){
+	var win = window.open("download.html", '_blank');
+	win.focus();
+});
+
 function downloadOutput(){
 	var download = {
-		result : $('#resultarea').html(),
-		uuid : currentScriptUUID
-	}
+		uuid : currentScriptUUID,
+		type : 'output'
+	};
 
-	socket.emit('downloadOutput', download);
-	var win = window.open("download.html", '_blank');
-		win.focus();
+	socket.emit('downloadHistoryOutput', download);
 }
 
 function downloadProgressLog(){
