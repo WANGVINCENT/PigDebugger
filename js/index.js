@@ -4,38 +4,36 @@ var string = '';
 var output = '';
 
 $(function(){
-	$('#date').html((new Date()).toString().split(' ').splice(1,3).join('-'));
-
 	$('#namenodeDialog').bind('show', function () {
 		document.getElementById ("xlInput").value = document.title;
 	});
 	$('#jobtrackerDialog').bind('show', function () {
 		document.getElementById ("xlInput").value = document.title;
 	});
-
-
-
-    //When scroll window, if main progressBar is out of view, progressBarBackup shows up
-	$(window).scroll(function() {
-		if($("div#progressBar:in-viewport").length == 0){
-	  		$('#progressBarBackup').slideDown();
-	   }else{
-	   		$('#progressBarBackup').slideUp();
-	   }
-	});
-
-	showPigHelper();
-
-	showToolTip();
-
-	//Disable download output button and download progresslog button
-	$('#downloadOutputButton').attr('disabled', true);
-	$('#downloadProgressLogButton').attr('disabled', true);
-	$('#outputButton').attr('disabled', false);
-	$('#resetinputButton').attr('disabled', false);
-	$('#killButton').attr('disabled', true);
-	$('#explainButton').attr('disabled', false);
 });
+
+$('#date').html((new Date()).toString().split(' ').splice(1,3).join('-'));
+
+//When scroll window, if main progressBar is out of view, progressBarBackup shows up
+$(window).scroll(function() {
+	if($("div#progressBar:in-viewport").length == 0){
+  		$('#progressBarBackup').slideDown();
+   }else{
+   		$('#progressBarBackup').slideUp();
+   }
+});
+
+showPigHelper();
+
+showToolTip();
+
+//Disable download output button and download progresslog button
+$('#downloadOutputButton').attr('disabled', true);
+$('#downloadProgressLogButton').attr('disabled', true);
+$('#outputButton').attr('disabled', false);
+$('#resetinputButton').attr('disabled', false);
+$('#killButton').attr('disabled', true);
+$('#explainButton').attr('disabled', false);
 
 $('#namenodeiframe').attr('src', 'http://' + host + ':50070');
 $('#jobtrackeriframe').attr('src', 'http://' + host + ':50030');
@@ -52,7 +50,7 @@ editor.on('keyup', function(cm, e) {
 	var keywords = ['FOREACH', 'GENERATE', 'LIMIT', 'GROUP', 'STORE', 'TOKENIZE', 'EXPLAIN', 'ILLUSTRATE', 'DESCRIBE', 'IMPORT', 'CONCAT', 
 				'COUNT', 'DISTINCT', 'FILTER', 'FLOOR', 'RANDOM', 'ROUND', 'TOTUPLE', 'TOBAG', 'TOMAP', 'INDEXOF', 'REPLACE', 'REGEX_EXTRACT',
 				'LOWER', 'LAST_INDEX_OF', 'REGEX_EXTRACT_ALL', 'STRSPLIT', 'SUBSTRING', 'UCFIRST', 'UPPER', 'FLATTEN', 'CROSS', 'ORDER', 
-				'SAMPLE', 'SPLIT', 'UNION', 'COGROUP', 'COUNT_START', 'PARALLEL', 'DUMP', 'STORE', 'LOAD'];
+				'SAMPLE', 'SPLIT', 'UNION', 'COGROUP', 'COUNT_START', 'PARALLEL', 'DUMP', 'STORE', 'LOAD', 'REGISTER'];
 
 	var words = editor.getDoc().getValue().split(/[\s\W]+/);
 	var lastword = words.pop();
@@ -92,7 +90,7 @@ function showPigHelper(){
     		'UNION %VAR1%, %VAR2%', 'PARALLEL %NUM%'],
 
     	'I/O':[
-    		'LOAD \'%FILE%\'', 'DUMP %VAR%', 'STORE %VAR% INTO %PATH%'],
+    		'LOAD \'%FILE%\'', 'DUMP %VAR%', 'STORE %VAR% INTO %PATH%', 'REGISTER \'%JARPATH%\''],
 
     	'Debug':[
     		'EXPLAIN %VAR%', 'ILLUSTRATE %VAR%', 'DESCRIBE %VAR%'],
@@ -139,6 +137,8 @@ function showToolTip(){
 		'#downloadOutputButton' : 'Download Output Button enables you to download the output not until the Pig script execution is finished!',
 		'#downloadProgressLog' : 'Download ProgressLog Button enables to downlaod the progress log not until the Pig script execution is finished!',
 		'#downloadExplainLogButton' : 'Download ExplainLog Button enables to download the MapReduce plan of the Pig script!',
+		'#namenode_navbar' : 'Name Node UI helps you visualize Hadoop NameNode information!',
+		'#jobtracker_navbar' : 'Job Tracker UI helps you visualize Hadoop Job Tracker information!',
 		'#queryhistory_navbar' : 'Query History helps you visualize the previous Pig script information!',
 		'#hdfs_navbar': 'HDFS authorizes to view and manage HDFS files!',
 		'#terminal_navbar' : 'Terminal helps you interact with console!',
@@ -156,7 +156,7 @@ function showToolTip(){
 
 	for(var i in tip_array){
 		$(i).attr('title', tip_array[i]);
-		if(i == '#queryhistory_navbar' || i == '#terminal_navbar' || i == '#about_navbar' || i == '#hdfs_navbar'){
+		if(i == '#queryhistory_navbar' || i == '#terminal_navbar' || i == '#about_navbar' || i == '#hdfs_navbar' || i == '#namenode_navbar' || i == '#jobtracker_navbar'){
 			$(i).attr('data-placement', 'bottom');
 		}
 		$(i).tooltip();
