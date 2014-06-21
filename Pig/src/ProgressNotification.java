@@ -181,7 +181,11 @@ public class ProgressNotification implements PigProgressNotificationListener{
 								"Mappers:",
 								String.valueOf(stats.getNumberMaps()),
 								" Reducers:",
-								String.valueOf(stats.getNumberReduces()) };
+								String.valueOf(stats.getNumberReduces()),
+								" MapTime:",
+								String.valueOf(stats.getAvgMapTime()),
+								" ReduceTime:",
+								String.valueOf(stats.getAvgREduceTime())};
 		StringBuilder operation = Tool.join(operations);
 		
 		//Store job finish notification to db
@@ -193,8 +197,8 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject.put("notification", "jobfinish");
 			jsonObject.put("uuid", uuid);
 			jsonObject.put("jobid", stats.getJobId());
-			jsonObject.put("maptime", stats.getAvgMapTime());
-			jsonObject.put("reducetime", stats.getAvgREduceTime());
+			jsonObject.put("maptime", stats.getMaxMapTime());
+			jsonObject.put("reducetime", stats.getMaxReduceTime());
 			jsonObject.put("mapNumber", stats.getNumberMaps());
 			jsonObject.put("reduceNumber", stats.getNumberReduces());
 			jsonObject.put("operation", operation);
@@ -247,22 +251,27 @@ public class ProgressNotification implements PigProgressNotificationListener{
 	@Override
 	public void jobsSubmittedNotification(String uuid, int number) {
 		
-		String jobOrder = ""; 
+		StringBuilder jobOrder = new StringBuilder();
 		jobCounter += number;
-		if(jobCounter == 1) {
-			jobOrder = jobCounter + "st";
-		} else if(jobCounter == 2) {
-			jobOrder = jobCounter + "nd";
-		} else if(jobCounter == 3) {
-			jobOrder = jobCounter + "rd";
-		} else {
-			jobOrder = jobCounter + "th";
-		}
+		switch(jobCounter){
+			case 1:
+				jobOrder = new StringBuilder(jobCounter + "st");
+				break;
+			case 2:
+				jobOrder = new StringBuilder(jobCounter + "nd");
+				break;
+			case 3:
+				jobOrder = new StringBuilder(jobCounter + "rd");
+				break;
+			default:
+				jobOrder = new StringBuilder(jobCounter + "th");
+				break;
+		}	
 		
 		//Construct the operation string
 		String[] operations = { Tool.getCurrentTime(),
 							    " SUBMIT the ",
-							    jobOrder,
+							    jobOrder.toString(),
 							    " JOB" };
 		StringBuilder operation = Tool.join(operations);
 		
@@ -374,30 +383,23 @@ public class ProgressNotification implements PigProgressNotificationListener{
 		}
 		
 		//Send output result
-		JSONObject jsonObject2 = new JSONObject();
 		Iterator<Tuple> it;
 		StringBuilder result = new StringBuilder();
 		try {
 			it = outputStats.iterator();
-			jsonObject2.put("notification", "output");
-			jsonObject2.put("uuid", uuid);
 			while(it.hasNext()){
 		        Tuple t = it.next();
 		        if(t.getAll() != null){
 		        	result.append(t.getAll().toString()).append("-");
 		        }
 		    }
-			jsonObject2.put("result", result);
-			client.addMessage(jsonObject2.toString());
 			
 			scriptName = Tool.extractPigName(scriptName);
 			//Store output into db
 			dbHandler.insertOutput(uuid, result, scriptName, "Succeed", currentTime);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+		} 
 	}
 	
 	@Override

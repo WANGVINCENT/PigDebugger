@@ -15,9 +15,9 @@ import org.hibernate.service.ServiceRegistryBuilder;
 
 public class DbHandler {
 	
-	private static DbHandler instance = null;
-	private static SessionFactory sessionFactory = null;
-    private static ServiceRegistry serviceRegistry = null;
+	private static DbHandler instance;
+	private static SessionFactory sessionFactory;
+    private static ServiceRegistry serviceRegistry;
     private final static String configPath = "nanwang/pig/hibernate/config/hibernate.cfg.xml";
     
     private DbHandler(){

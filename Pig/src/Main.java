@@ -26,6 +26,7 @@ public class Main {
 		String ip = args[2];
 		int port = Integer.valueOf(args[3]);
 		String type = args[4];
+		String properties = args[5];
 		
 		/*String mode = "local";
 		String pigname = "test.pig";
@@ -36,6 +37,8 @@ public class Main {
 		LinkedList<String> parameters =  new LinkedList<String>();
 		parameters.add("-x");
 		parameters.add(mode);
+		parameters.add("-P");
+		parameters.add(properties);
 		parameters.add(pigname);
 		
 		String[] commands = parameters.toArray(new String[0]);
