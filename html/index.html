@@ -82,7 +82,7 @@
 					    Pig Helper
 					    <span class="caret"></span>
 					</a>
-					<ul id="pighelper" class="dropdown-menu">
+					<ul id="pighelper" style="cursor: pointer;" class="dropdown-menu">
 					</ul>
 				</div>
 
@@ -92,8 +92,8 @@
 					    <span class="caret"></span>
 					</a>
 					<ul id="modeSelector" style="cursor: pointer;" class="dropdown-menu">
-						<li><a tabindex="-1" onclick="setMode(this.innerHTML)">local</a></li>
-						<li><a tabindex="-1" onclick="setMode(this.innerHTML)">mapreduce</a></li>
+						<li><a onclick="setMode(this.innerHTML)">local</a></li>
+						<li><a onclick="setMode(this.innerHTML)">mapreduce</a></li>
 					</ul>
 				</div>
 				<!--<div id="hadoopdirdiv">
@@ -142,7 +142,6 @@
 					<a class="btn btn-danger" onclick="$('#UDFDialog').modal('hide');">Close</a>
 				</div>
 			</div>
-
 
 			<div id="buttongroup1">
 				<button class="btn btn-success" id="executeButton" onclick="executeScript()">Execute <i class="icon-play-circle icon-white"></i></button>

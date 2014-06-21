@@ -100,10 +100,10 @@ function showPigHelper(){
     		'UNION %VAR1%, %VAR2%', 'PARALLEL %NUM%'],
 
     	'I/O':[
-    		'LOAD \'%FILE%\'', 'DUMP %VAR%', 'STORE %VAR% INTO %PATH%', 'REGISTER \'%JARPATH%\''],
+    		'LOAD \'%FILE%\';', 'DUMP %VAR%;', 'STORE %VAR% INTO %PATH%;', 'REGISTER \'%JARPATH%\';'],
 
     	'Debug':[
-    		'EXPLAIN %VAR%', 'ILLUSTRATE %VAR%', 'DESCRIBE %VAR%'],
+    		'EXPLAIN %VAR%;', 'ILLUSTRATE %VAR%;', 'DESCRIBE %VAR%;'],
 
     	'Math': [			
     		'ABS(%VAR%)', 'ACOS(%VAR%)', 'ASIN(%VAR%)', 'ATAN(%VAR%)', 'CBRT(%VAR%)', 'CEIL(%VAR%)', 'COS(%VAR%)', 'COSH(%VAR%)', 'EXP(%VAR%)',
@@ -120,7 +120,7 @@ function showPigHelper(){
     		'UPPER(%STRING%)'],
 
     	'Macro':[
-    		'IMPORT \'PATH_TO_MACRO\'']
+    		'IMPORT \'PATH_TO_MACRO\';']
 	};
 
 	var res = '';
@@ -431,6 +431,7 @@ function coordinate(data){
         $('#stateLog').html(string);
         $('#explainarea').html(data.plan);
 	}else if(data.notification == 'explain'){
+		console.log(data.plan);
 		$('#explainarea').html(data.plan);
 	}else{
 		string += '<tr>';
@@ -626,6 +627,8 @@ var line_clause = {};
 var type;
 var running = false;
 function executeScript(){
+
+	alert('Please do not select other scripts during the execution, otherwise the progression data will be lost!');
 	type = 'script';
 	reset();
 	kill = false;

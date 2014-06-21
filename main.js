@@ -7,7 +7,6 @@ var sys = require('sys')
 var process = require('child_process');
 var mysql = require('mysql');
 var multipart = require("multipart");
-var querystring = require("querystring");
 
 var exec;
 var tcpData;
@@ -296,7 +295,7 @@ io.sockets.on('connection', function (socket) {
     	executionString += host + ' ';
     	executionString += tcpPort + ' ';
     	executionString += 'script ';
-    	executionString += __dirname + '/pig.properties'
+    	executionString += __dirname + '/pig.properties';
     	console.log(executionString);
     	sys.debug('Execute the script!');
     	exec = process.exec(executionString, puts);
@@ -323,7 +322,8 @@ io.sockets.on('connection', function (socket) {
     	explainString += ' ' + __dirname + '/scripts/' + data.name + '.pig ';
     	explainString += host + ' ';
     	explainString += tcpPort + ' ';
-    	explainString += 'explain';
+    	explainString += 'explain ';
+    	explainString += __dirname + '/pig.properties';
     	sys.debug('Explain the script!');
     	exec = process.exec(explainString, puts);
 	});
