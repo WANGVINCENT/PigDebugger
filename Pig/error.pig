@@ -1,1 +1,0 @@
-states = LOA '/Users/nanwangn/Documents/state.tsv' AS (code:int,abbr:chararray,name:chararray);
