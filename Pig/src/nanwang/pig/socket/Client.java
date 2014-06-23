@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -29,7 +30,7 @@ public class Client{
 	private BufferedReader br;
 	private static BufferedWriter bw;
 	//Messages queue
-	private LinkedList<String> messages = new LinkedList<String>();
+	private Queue<String> messages = new LinkedList<String>();
 	//Execution complete flag
 	private boolean completed = false;
 	private final int periodicTime = 900;
@@ -46,23 +47,23 @@ public class Client{
 		br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
 		
+	
 		/*Start the timer and send message to node.js server periodically*/
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			public void run() {
-				for(int i=0;i<messages.size();i++){
+				while(!messages.isEmpty())
+				{
 					try {
-						JSONTokener tokener = new JSONTokener(messages.get(i));
+						JSONTokener tokener = new JSONTokener(messages.peek());
 						JSONObject root = new JSONObject(tokener);
 						if(root.get("notification").equals("success") && completed){
-							write(messages.get(i) + "\n");
-							messages.remove(i);
+							write(messages.poll() + "\n");
 							close();
 							DbHandler.close();
 							System.exit(1);
 						}else if(!root.get("notification").equals("success")){
-							write(messages.get(i)+"\n");
-							messages.remove(i);
+							write(messages.poll()+"\n");
 						}
 						
 						if(root.get("notification").equals("complete")){
