@@ -668,7 +668,7 @@ function executeScript(){
 //kill script
 function killScript(){
 	kill = true;
-	socket.emit('kill', 'kill');
+	socket.emit('kill', currentJobId);
 	reset();
 	$('#explainButton').attr('disabled', false);
 	var delay = 1000;

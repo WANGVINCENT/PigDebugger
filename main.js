@@ -306,6 +306,7 @@ io.sockets.on('connection', function (socket) {
     	sys.debug('Kill the execution!');
     	var pid = exec.pid + 1
 		process.exec('kill -9 ' + pid);
+		process.exec('/usr/local/hadoop/bin/hadoop job -kill ' + data);
     });
 
     socket.on('explain', function(data){
