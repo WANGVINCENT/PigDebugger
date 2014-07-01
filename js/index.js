@@ -272,7 +272,7 @@ function coordinate(data){
 			uuid : currentScriptUUID,
 			type : 'output'
 		};
-		socket.emit('getOutput', getOutput);
+		//socket.emit('getOutput', getOutput);
 
 		$('#success').attr('class','label label-success');
 		$('#success').html('Succeed');

@@ -7,16 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import nanwang.pig.entity.DbHandler;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  * 
@@ -29,11 +19,6 @@ public class Client{
 	private Socket socket;
 	private BufferedReader br;
 	private static BufferedWriter bw;
-	//Messages queue
-	private Queue<String> messages = new LinkedList<String>();
-	//Execution complete flag
-	private boolean completed = false;
-	private final int periodicTime = 900;
 	
 	/**
 	 * Constructor
@@ -46,37 +31,6 @@ public class Client{
 		socket = new Socket(ip, port);
 		br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
-		
-	
-		/*Start the timer and send message to node.js server periodically*/
-		Timer timer = new Timer();
-		timer.scheduleAtFixedRate(new TimerTask() {
-			public void run() {
-				while(!messages.isEmpty())
-				{
-					try {
-						JSONTokener tokener = new JSONTokener(messages.peek());
-						JSONObject root = new JSONObject(tokener);
-						if(root.get("notification").equals("success") && completed){
-							write(messages.poll() + "\n");
-							close();
-							DbHandler.close();
-							System.exit(1);
-						}else if(!root.get("notification").equals("success")){
-							write(messages.poll()+"\n");
-						}
-						
-						if(root.get("notification").equals("complete")){
-							completed = true;
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}, 0, periodicTime);
 	}
 	
 	/**
@@ -90,15 +44,6 @@ public class Client{
         line = br.readLine();
         sb.append(line);
         return sb.toString();
-	}
-	
-	/**
-	 * This method is used for adding messages in the queue
-	 * @param message
-	 * @throws IOException
-	 */
-	public void addMessage(String message) throws IOException{
-		messages.add(message);
 	}
 	
 	/**

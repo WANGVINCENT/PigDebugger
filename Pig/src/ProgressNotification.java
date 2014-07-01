@@ -8,6 +8,7 @@ import java.util.TimerTask;
 
 import nanwang.pig.entity.DbHandler;
 import nanwang.pig.socket.Client;
+import nanwang.pig.socket.Sender;
 import nanwang.pig.utils.Tool;
 
 import org.apache.commons.lang.StringUtils;
@@ -49,14 +50,16 @@ public class ProgressNotification implements PigProgressNotificationListener{
 	private String mode ;
 	private String type;
 	private DbHandler dbHandler;
+	private Sender sender;
 	private final int CheckMapReduceTime  = 500;
 
-	public ProgressNotification(Client client, DbHandler dbHandler, String scriptName, String mode, String type) throws UnknownHostException, IOException{
-		this.client = client;
+	public ProgressNotification(Sender sender, DbHandler dbHandler, String scriptName, String mode, String type) throws UnknownHostException, IOException{
 		this.scriptName = scriptName;
 		this.mode = mode;
 		this.type = type;
 		this.dbHandler = dbHandler;
+		this.sender = sender;
+		this.client = sender.getClient();
 		
 		Configuration conf = new Configuration();
 		jobClient = new JobClient(new JobConf(conf)); 
@@ -119,7 +122,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 				jsonObject.put("mode", mode);
 				jsonObject.put("plan", plan.toString());
 				jsonObject.put("alias", StringUtils.join(aliasList, "+"));
-				client.addMessage(jsonObject.toString());
+				sender.addMessage(jsonObject.toString());
 			}else{
 				jsonObject.put("notification", "explain");
 				jsonObject.put("plan", plan.toString());
@@ -159,7 +162,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject.put("notification", "jobfail");
 			jsonObject.put("uuid", uuid);
 			jsonObject.put("operation", operation);
-			client.addMessage(jsonObject.toString());
+			sender.addMessage(jsonObject.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -178,14 +181,15 @@ public class ProgressNotification implements PigProgressNotificationListener{
 								stats.getAlias(),
 								" FEATURES ",
 								stats.getFeature(),
-								"Mappers:",
-								String.valueOf(stats.getNumberMaps()),
-								" Reducers:",
-								String.valueOf(stats.getNumberReduces()),
+								" Reducers input:",
+								String.valueOf(stats.getReduceInputRecords()),
+								" Mappers output:",
+								String.valueOf(stats.getMapOutputRecords()),
 								" MapTime:",
 								String.valueOf(stats.getAvgMapTime()),
 								" ReduceTime:",
-								String.valueOf(stats.getAvgREduceTime())};
+								String.valueOf(stats.getAvgREduceTime()),
+								};
 		StringBuilder operation = Tool.join(operations);
 		
 		//Store job finish notification to db
@@ -203,7 +207,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject.put("reduceNumber", stats.getNumberReduces());
 			jsonObject.put("operation", operation);
 			jsonObject.put("mode", mode);
-			client.addMessage(jsonObject.toString());
+			sender.addMessage(jsonObject.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -240,7 +244,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject.put("jobid", jobId);
 			jsonObject.put("operation", operation);
 			jsonObject.put("mode", mode);
-			client.addMessage(jsonObject.toString());
+			sender.addMessage(jsonObject.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -284,7 +288,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject.put("notification", "jobsubmit");
 			jsonObject.put("uuid", uuid);
 			jsonObject.put("operation", operation);
-			client.addMessage(jsonObject.toString());
+			sender.addMessage(jsonObject.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -311,7 +315,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject.put("notification", "complete");
 			jsonObject.put("uuid", uuid);
 			jsonObject.put("operation", operation);
-			client.addMessage(jsonObject.toString());
+			sender.addMessage(jsonObject.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -341,7 +345,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject.put("jobsNumber", jobsNumber);
 			jsonObject.put("operation", operation);
 			jsonObject.put("mode", mode);
-			client.addMessage(jsonObject.toString());
+			sender.addMessage(jsonObject.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -375,7 +379,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject1.put("notification", "outputcomplete");
 			jsonObject1.put("uuid", uuid);
 			jsonObject1.put("operation", operation);
-			client.addMessage(jsonObject1.toString());
+			sender.addMessage(jsonObject1.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -383,7 +387,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 		}
 		
 		//Send output result
-		Iterator<Tuple> it;
+		/*Iterator<Tuple> it;
 		StringBuilder result = new StringBuilder();
 		try {
 			it = outputStats.iterator();
@@ -399,7 +403,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			dbHandler.insertOutput(uuid, result, scriptName, "Succeed", currentTime);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 
+		} */
 	}
 	
 	@Override
@@ -411,7 +415,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject.put("notification", "progress");
 			jsonObject.put("uuid", uuid);
 			jsonObject.put("progress", number);
-			client.addMessage(jsonObject.toString());
+			sender.addMessage(jsonObject.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -445,7 +449,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 				  jsonObject.put("mapprogress", runningJob.mapProgress());
 				  jsonObject.put("reduceprogress", runningJob.reduceProgress());
 				
-				  client.addMessage(jsonObject.toString());
+				  sender.addMessage(jsonObject.toString());
 			  } catch (JSONException e) {
 				  e.printStackTrace();
 			  } catch (IOException e) {
@@ -461,7 +465,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 				  jsonObject.put("mapprogress", runningJob.mapProgress());
 				  jsonObject.put("reduceprogress", runningJob.reduceProgress());
 				
-				  client.addMessage(jsonObject.toString());
+				  sender.addMessage(jsonObject.toString());
 			  } catch (JSONException e) {
 				  e.printStackTrace();
 			  } catch (IOException e) {

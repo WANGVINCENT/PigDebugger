@@ -19,11 +19,9 @@ public class Tool {
 	 * @return
 	 */
 	public static String getCurrentTime(){
-		Date date = new Date(System.currentTimeMillis());
+		Date date = new Date();
 		DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss:SSS");
-		String dateFormatted = formatter.format(date);
-		
-		return "[" + dateFormatted + "]";
+		return "[" + formatter.format(date) + "]";
 	}
 	
 	/**
@@ -41,7 +39,7 @@ public class Tool {
 	 * @param strings
 	 * @return StringBuilder
 	 */
-	public static StringBuilder join(String[] strings){
+	public static StringBuilder join(String... strings){
 		StringBuilder stringBuilder = new StringBuilder();
 		for(String string : strings){
 			if(string != null){

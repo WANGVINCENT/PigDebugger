@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import nanwang.pig.entity.DbHandler;
 import nanwang.pig.socket.Client;
+import nanwang.pig.socket.Sender;
 import nanwang.pig.utils.Tool;
 
 import org.apache.pig.PigRunner;
@@ -44,19 +45,20 @@ public class Main {
 		String[] commands = parameters.toArray(new String[0]);
 		
 		Client client = new Client(ip, port);
+		Sender sender = new Sender(client);
 		
 		DbHandler dbHandler = DbHandler.getInstance();
 		
 		if(type.equals("script")){
 			//run script
-			PigStats stats = PigRunner.run(commands, new ProgressNotification(client, dbHandler, pigname, mode, type));
+			PigStats stats = PigRunner.run(commands, new ProgressNotification(sender, dbHandler, pigname, mode, type));
 	        if(!stats.isSuccessful()){
 	        	//Send fail message
 				JSONObject jsonObject = new JSONObject();
 				try {
 					jsonObject.put("notification", "fail");
 					jsonObject.put("error", stats.getErrorMessage());
-					client.addMessage(jsonObject.toString());
+					sender.addMessage(jsonObject.toString());
 					
 					pigname = Tool.extractPigName(pigname);
 					String time = Tool.getCurrentTime();
@@ -74,7 +76,10 @@ public class Main {
 				try {
 					jsonObject.put("notification", "success");
 					jsonObject.put("duration", stats.getDuration());
-					client.addMessage(jsonObject.toString());
+					sender.addMessage(jsonObject.toString());
+					//Store job into database
+					dbHandler.insertJob(stats.getScriptId(), jsonObject.toString());
+					
 				} catch (JSONException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -84,7 +89,7 @@ public class Main {
 	        
 		} else if(type.equals("explain")){
 			//explain
-			PigRunner.run(commands, new ProgressNotification(client, dbHandler, pigname, mode, type));
+			PigRunner.run(commands, new ProgressNotification(sender, dbHandler, pigname, mode, type));
 		}
 	}
 }

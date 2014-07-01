@@ -164,7 +164,9 @@
 				for(var i=(currentPageNumber-1)*numberPerPage;i<min;i++){
 					if(new_data[i][4] != '0'){
 						var filesize = '';
-						if(new_data[i][4] > 1024){
+						if(new_data[i][4] >= 1048576 * 1024){
+							filesize = Number(new_data[i][4] / (1048576 * 1024)).toFixed(2) + ' GB';
+						}else if(new_data[i][4] >= 1048576){
 							filesize = Number(new_data[i][4] / 1048576).toFixed(2) + ' MB';
 						}else{
 							filesize = Number(new_data[i][4] / 1024).toFixed(2) + 'KB';
