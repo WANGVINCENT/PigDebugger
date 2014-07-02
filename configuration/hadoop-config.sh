@@ -34,7 +34,7 @@ sudo sh -c 'cat /home/hduser/.ssh/id_rsa.pub >> /home/hduser/.ssh/authorized_key
 # Install Hadoop and set permissons
 cd ~
 if [ ! -f hadoop-1.2.1.tar.gz ]; then
-	wget http://mirror.vorboss.net/apache/hadoop/common/stable1/hadoop-1.2.1.tar.gz
+	wget http://apache.mirrors.timporter.net/hadoop/common/hadoop-1.2.1/hadoop-1.2.1.tar.gz
 fi
 sudo tar vxzf hadoop-1.2.1.tar.gz -C /usr/local
 cd /usr/local
@@ -73,11 +73,11 @@ sudo chown hduser:hadoop /app/hadoop/tmp
 sudo chmod 750 /app/hadoop/tmp
 
 # Edit configuration files
-sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>hadoop\.tmp\.dir\</name>\<value>/app/hadoop/tmp</value>\</property>\<property>\<name>fs\.default\.name\</name>\<value>hdfs://146.169.44.198:54310\</value>\</property>=g' core-site.xml 
+sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>hadoop\.tmp\.dir\</name>\<value>/app/hadoop/tmp</value>\</property>\<property>\<name>fs\.default\.name\</name>\<value>hdfs://146.169.45.191:54310\</value>\</property>=g' core-site.xml 
 
-sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>dfs\.replication\</name>\<value>2</value>\</property>=g' hdfs-site.xml
+sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>dfs\.replication\</name>\<value>3</value>\</property>=g' hdfs-site.xml
 
-sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>mapred\.job\.tracker\</name>\<value>146.169.44.198:54311</value>\</property>=g' mapred-site.xml
+sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>mapred\.job\.tracker\</name>\<value>146.169.45.191:54311\</value>\</property>\<property>\<name>mapred\.child\.java\.opts\</name>\<value>-Xmx1024m\</value>\</property>\<property>\<name>mapred\.tasktracker\.map\.tasks\.maximum\</name>\<value>4\</value>\</property>\<property>\<name>mapred\.tasktracker\.reduce\.tasks\.maximum\</name>\<value>2\</value>\</property>=g' mapred-site.xml
 
 #### PIG INSTALLATION ####
 
@@ -139,3 +139,5 @@ sudo -u hduser /usr/local/hadoop/bin/hadoop namenode -format
 
 # Visit hdfs online 
 # http://146.169.44.224:50070
+
+
