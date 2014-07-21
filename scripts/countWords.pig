@@ -1,4 +1,4 @@
-text =  LOAD '/user/hduser/tsv/text2.tsv';
+text =  LOAD '/user/hduser/tsv/image.sql';
 words = FOREACH text GENERATE FLATTEN(TOKENIZE((chararray)$0)) AS word; 
 word_tuples = GROUP words BY word;
 

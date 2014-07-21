@@ -1,4 +1,4 @@
-var host = '146.169.45.191';
+var host = '146.169.44.203';
 var socket = io.connect('http://' + host + ':8080');
 var string = '';
 var output = '';
