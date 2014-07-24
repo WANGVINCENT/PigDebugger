@@ -73,11 +73,11 @@ sudo chown hduser:hadoop /app/hadoop/tmp
 sudo chmod 750 /app/hadoop/tmp
 
 # Edit configuration files
-sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>hadoop\.tmp\.dir\</name>\<value>/app/hadoop/tmp</value>\</property>\<property>\<name>fs\.default\.name\</name>\<value>hdfs://146.169.45.41:54310\</value>\</property>=g' core-site.xml 
+sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>hadoop\.tmp\.dir\</name>\<value>/app/hadoop/tmp</value>\</property>\<property>\<name>fs\.default\.name\</name>\<value>hdfs://146.169.44.100:54310\</value>\</property>=g' core-site.xml 
 
-sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>dfs\.replication\</name>\<value>3</value>\</property>=g' hdfs-site.xml
+sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>dfs\.block\.size\</name>\<value>268435456</value>\</property>\<property>\<name>dfs\.replication\</name>\<value>3</value>\</property>=g' hdfs-site.xml
 
-sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>mapred\.job\.tracker\</name>\<value>146.169.45.41:54311\</value>\</property>\<property>\<name>mapred\.child\.java\.opts\</name>\<value>-Xmx1024m\</value>\</property>\<property>\<name>mapred\.tasktracker\.map\.tasks\.maximum\</name>\<value>4\</value>\</property>\<property>\<name>mapred\.tasktracker\.reduce\.tasks\.maximum\</name>\<value>2\</value>\</property>=g' mapred-site.xml
+sudo -u hduser sed -i.bak 's=<configuration>=<configuration>\<property>\<name>mapred\.job\.tracker\</name>\<value>146.169.44.100:54311\</value>\</property>\<property>\<name>mapred\.child\.java\.opts\</name>\<value>-Xmx500m\</value>\</property>\<property>\<name>mapred\.tasktracker\.map\.tasks\.maximum\</name>\<value>6\</value>\</property>\<property>\<name>mapred\.tasktracker\.reduce\.tasks\.maximum\</name>\<value>4\</value>\</property>\<property>\<name>mapred\.compress\.map\.output\</name>\<value>true\</value>\</property>\<property>\<name>mapred\.reduce\.slowstart\.completed\.maps\</name>\<value>0.8\</value>\</property>=g' mapred-site.xml
 
 #### PIG INSTALLATION ####
 
