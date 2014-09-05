@@ -18,10 +18,21 @@ public class Tool {
 	 * with format yyyy/MM/dd HH:mm:ss:SSS
 	 * @return
 	 */
+	
 	public static String getCurrentTime(){
 		Date date = new Date();
 		DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss:SSS");
 		return "[" + formatter.format(date) + "]";
+	}
+
+	/**
+	 * This method is used for obtaining the date
+	 * @return
+	 */
+	public static String getDate(){
+		Date date = new Date();
+		DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+		return formatter.format(date);
 	}
 	
 	/**

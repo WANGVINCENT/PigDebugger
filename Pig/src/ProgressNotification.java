@@ -1,12 +1,21 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import nanwang.pig.entity.AVGCounter;
 import nanwang.pig.entity.DbHandler;
+import nanwang.pig.entity.JobCounter;
 import nanwang.pig.socket.Client;
 import nanwang.pig.socket.Sender;
 import nanwang.pig.utils.Tool;
@@ -40,6 +49,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 	private int jobCounter;
 	private Client client;
 	private String scriptName;
+	private String scriptId;
 	private String currentJobId;
 	private JobClient jobClient;
 	private float mapProgress;
@@ -52,14 +62,20 @@ public class ProgressNotification implements PigProgressNotificationListener{
 	private DbHandler dbHandler;
 	private Sender sender;
 	private final int CheckMapReduceTime  = 500;
+	private final long start;
+	private int jobRankNum;
+	
+	private final String initFilePath = "/usr/local/hadoop/logs/history/done/version-1/";
 
-	public ProgressNotification(Sender sender, DbHandler dbHandler, String scriptName, String mode, String type) throws UnknownHostException, IOException{
-		this.scriptName = scriptName;
+	public ProgressNotification(Sender sender, DbHandler dbHandler, String scriptName, String mode, String type, long start) throws UnknownHostException, IOException{
+		this.scriptName = Tool.extractPigName(scriptName);
 		this.mode = mode;
 		this.type = type;
 		this.dbHandler = dbHandler;
+		this.start = start;
 		this.sender = sender;
 		this.client = sender.getClient();
+		sender.setPigName(scriptName);
 		
 		Configuration conf = new Configuration();
 		jobClient = new JobClient(new JobConf(conf)); 
@@ -91,6 +107,8 @@ public class ProgressNotification implements PigProgressNotificationListener{
 	@Override
 	public void initialPlanNotification(String uuid, MROperPlan plan) {
 		
+		scriptId = uuid;
+		sender.setPigScriptId(scriptId);
 		//Get and construct alias string
 		LinkedList<String> aliasList = new LinkedList<String>();
 		
@@ -173,25 +191,144 @@ public class ProgressNotification implements PigProgressNotificationListener{
 	@Override
 	public void jobFinishedNotification(String uuid, JobStats stats) {
 		
+		jobRankNum++;
 		//Construct the operation string
-		String[] operations = { Tool.getCurrentTime(),
-								" FINISH JOB ",
-								stats.getJobId(),
-								" ALIAS ",
-								stats.getAlias(),
-								" FEATURES ",
-								stats.getFeature(),
-								" Reducers input:",
-								String.valueOf(stats.getReduceInputRecords()),
-								" Mappers output:",
-								String.valueOf(stats.getMapOutputRecords()),
-								" MapTime:",
-								String.valueOf(stats.getAvgMapTime()),
-								" ReduceTime:",
-								String.valueOf(stats.getAvgREduceTime()),
-								};
-		StringBuilder operation = Tool.join(operations);
+		String[] operations = new String[14]; 
+		operations[0] = Tool.getCurrentTime();
+		operations[1] = " FINISH JOB ";
+		operations[2] = stats.getJobId();
+		operations[3] = " ALIAS ";
+		operations[4] = stats.getAlias();
+		operations[5] = " FEATURES ";
+		operations[6] = stats.getFeature();
 		
+		int mapNum = stats.getNumberMaps();
+		int reduceNum = stats.getNumberReduces();
+	
+		//create a PigLatin counter entity
+		JobCounter counter = new JobCounter();
+		counter.setName(scriptName);
+		counter.setMapElapsedTime(stats.getAvgMapTime()/1000);
+		counter.setReduceElapsedTime(stats.getAvgREduceTime()/1000);
+		counter.setMapNum(mapNum);
+		counter.setReduceNum(reduceNum);
+		counter.setJobRankNum(jobRankNum);
+		
+		StringBuilder filePath = new StringBuilder(initFilePath);
+		//Obtain the root directory
+		File rootFolder = new File(initFilePath.toString());
+		File[] listOfRootFiles = rootFolder.listFiles();
+		for(File file : listOfRootFiles){
+			if(file.isDirectory()){
+				filePath.append(file.getName());
+				filePath.append("/");
+			}
+		}
+		
+		//Build the job info file path
+		filePath.append(Tool.getDate());
+		filePath.append("/");
+		filePath.append("000000");
+		filePath.append("/");
+		
+		File folder = new File(filePath.toString());
+		File[] listOfFiles = folder.listFiles();
+		BufferedReader br = null;
+		String line = null;
+		
+		//Iterate through all files in specific the folder and find the file
+		for (int i=0;i<listOfFiles.length;i++) {
+			if(listOfFiles[i].isFile()&&listOfFiles[i].getName().endsWith(".pig")&&listOfFiles[i].getName().contains(stats.getJobId())) {
+				
+				Map<String, String> reduceStartTime = new HashMap<String, String>();
+				try {
+					long shuffleTime = 0;
+					long sortTime = 0;
+					long reduceTime = 0;
+					
+					//Read the file line by line
+					br = new BufferedReader(new FileReader(filePath + listOfFiles[i].getName()));
+					while ((line = br.readLine()) != null) {
+						
+						//Obtain the CPU time spent for each job
+						if(line.contains("JOBID=")&&line.contains("CPU time spent")){
+							Pattern pattern = Pattern.compile("(ms\\\\\\\\\\)\\))\\(([0-9]+)\\)");
+							Matcher matcher = pattern.matcher(line);
+							int count = 7;
+							int mapCPU = 0, reducerCPU = 0;
+						    while (matcher.find()) {
+						    	if(Integer.valueOf(matcher.group(2)) > 0){
+						    		if(count == 7){
+						    			mapCPU = (int)(Long.valueOf(matcher.group(2))/1000/mapNum);
+						    			counter.setMapCPUTime(mapCPU);
+						    			operations[count] = "(MapCPUTime:" + String.valueOf(mapCPU) + "s)-";
+						    		}else if(count == 8){
+						    			reducerCPU = (int)(Long.valueOf(matcher.group(2))/1000/reduceNum);
+						    			counter.setReduceCPUTime(reducerCPU);
+						    			operations[count] = "(ReduceCPUTime:" + String.valueOf(reducerCPU) + "s)-";
+						    		}else if(count == 9){
+						    			operations[count] = "(TotalCPUTime:" + String.valueOf(mapCPU + reducerCPU) + "s)-";
+						    			counter.setTotalCPUTime(mapCPU + reducerCPU);
+						    		}
+						    		count++;
+						    	}
+						    }
+						    
+						    Pattern shuffleBytesPattern = Pattern.compile("Reduce shuffle bytes\\)\\(([0-9]+)\\).*");
+						    Matcher ShuffleBytesMatcher = shuffleBytesPattern.matcher(line);
+							
+							while (ShuffleBytesMatcher.find()) {
+								int shuffleBytes = (int)(Long.valueOf(ShuffleBytesMatcher.group(1))/reduceNum/1048576);
+								operations[13] = "(ShuffleBytes:" + String.valueOf(shuffleBytes) + "M)";
+								counter.setShuffleBytes(shuffleBytes);
+							}
+						//Obtain the start time for each reducers
+						}else if(line.contains("TASKID=")&&line.contains("TASK_TYPE=\"REDUCE\"")&&line.contains("START_TIME=")){
+							Pattern startTimePattern = Pattern.compile("TASKID=\"(task.*)\".*TASK_TYPE.*START_TIME=\"([0-9]+)\"");
+							Matcher startTimeMatcher = startTimePattern.matcher(line);
+							
+							while (startTimeMatcher.find()) {
+								reduceStartTime.put(startTimeMatcher.group(1), startTimeMatcher.group(2));
+							}
+						//calculate respectively the shuffle time, sort time, reduce time and total reducer time
+						}else if(line.contains("TASK_TYPE=\"REDUCE\"")&&line.contains("TASK_STATUS=\"SUCCESS\"")&&line.contains("SHUFFLE_FINISHED=")){
+							Pattern shuffleTimePattern = Pattern.compile("TASKID=\"(.*)\".*TASK_ATTEMPT_ID=.*SHUFFLE_FINISHED=\"([0-9]+)\".*SORT_FINISHED=\"([0-9]+)\".*FINISH_TIME=\"([0-9]+)\"");
+							Matcher shuffleTimeMatcher = shuffleTimePattern.matcher(line);
+							
+							while (shuffleTimeMatcher.find()) {
+								if(reduceStartTime.containsKey(shuffleTimeMatcher.group(1))){
+									long startTime = Long.valueOf(reduceStartTime.get(shuffleTimeMatcher.group(1)));
+									shuffleTime += (Long.valueOf(shuffleTimeMatcher.group(2)) - startTime);
+									sortTime += (Long.valueOf(shuffleTimeMatcher.group(3)) - startTime);
+									reduceTime += (Long.valueOf(shuffleTimeMatcher.group(4)) - startTime);
+								}
+							}
+						}
+					}
+					br.close();
+					int avgShuffleTime = (int)(shuffleTime/1000/reduceNum);
+					int avgSortTime = (int)(sortTime/1000/reduceNum - shuffleTime/1000/reduceNum);
+					int avgReduceTime = (int)(reduceTime/1000/reduceNum - sortTime/1000/reduceNum);
+					counter.setShufflePhaseTime(avgShuffleTime);
+					counter.setSortPhaseTime(avgSortTime);
+					counter.setReducePhaseTime(avgReduceTime);
+					
+					operations[10] = "(AvgShufflePhaseTime:" + String.valueOf(avgShuffleTime) + "s)-";
+					operations[11] = "(AvgSortPhaseTime:" + String.valueOf(avgSortTime) + "s)-";
+					operations[12] = "(AvgReducePhaseTime:" + String.valueOf(avgReduceTime) + "s)-";
+					
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} 
+	    }
+		
+		dbHandler.insert(counter);
+		dbHandler.updateAVGCounter(new AVGCounter(counter));
+
+		StringBuilder operation = Tool.join(operations);
 		//Store job finish notification to db
 		dbHandler.insertJob(uuid, operation.toString());
 		
@@ -201,10 +338,10 @@ public class ProgressNotification implements PigProgressNotificationListener{
 			jsonObject.put("notification", "jobfinish");
 			jsonObject.put("uuid", uuid);
 			jsonObject.put("jobid", stats.getJobId());
-			jsonObject.put("maptime", stats.getMaxMapTime());
-			jsonObject.put("reducetime", stats.getMaxReduceTime());
-			jsonObject.put("mapNumber", stats.getNumberMaps());
-			jsonObject.put("reduceNumber", stats.getNumberReduces());
+			jsonObject.put("maptime", stats.getAvgMapTime());
+			jsonObject.put("reducetime", stats.getAvgREduceTime());
+			jsonObject.put("mapNumber", mapNum);
+			jsonObject.put("reduceNumber", reduceNum);
 			jsonObject.put("operation", operation);
 			jsonObject.put("mode", mode);
 			sender.addMessage(jsonObject.toString());
@@ -321,6 +458,21 @@ public class ProgressNotification implements PigProgressNotificationListener{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		jsonObject = new JSONObject();
+		try {
+			long time = System.currentTimeMillis() - start;
+			jsonObject.put("notification", "success");
+			jsonObject.put("duration", time);
+			sender.addMessage(jsonObject.toString());
+			//Store job into database
+			dbHandler.insertJob(scriptId, "Total execution time : " + time + " s");
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -362,7 +514,7 @@ public class ProgressNotification implements PigProgressNotificationListener{
 		String[] operations = new String[5];
 		operations[0] = currentTime;
 		operations[1] = " COMPLETE OUTPUT";
-
+		
 		if(mode.equals("mapreduce")){
 			operations[2] = " WITH ";
 			operations[3] = String.valueOf(outputStats.getNumberRecords());
@@ -398,7 +550,6 @@ public class ProgressNotification implements PigProgressNotificationListener{
 		        }
 		    }
 			
-			scriptName = Tool.extractPigName(scriptName);
 			//Store output into db
 			dbHandler.insertOutput(uuid, result, scriptName, "Succeed", currentTime);
 		} catch (IOException e) {

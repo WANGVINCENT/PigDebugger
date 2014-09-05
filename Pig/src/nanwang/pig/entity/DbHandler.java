@@ -1,6 +1,9 @@
 package nanwang.pig.entity;
 
+import java.util.List;
+
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -64,7 +67,114 @@ public class DbHandler {
 		session.beginTransaction();
 		session.save(object);
 		session.getTransaction().commit();
+		session.close();
 	}
+    
+    /**
+     * This method is used for deleting counter from db based on script_name
+     * @param scriptName
+     */
+    public void deleteCounter(String scriptName){
+    	Session session = sessionFactory.openSession();
+		session.beginTransaction();
+		
+		Query query = session.createQuery("delete from counter where script_name = :script_name");
+		query.setParameter("script_name", scriptName);
+		
+		query.executeUpdate();
+		session.getTransaction().commit();
+		session.close();
+    }
+    
+    /**
+     * This method is used for retrieve data from JobCounter in db
+     * @param tableName
+     * @param scriptName
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public List<JobCounter> readJobCounter(String scriptName, int jobRankNum){
+    	Session session = sessionFactory.openSession();
+		session.beginTransaction();
+		
+		Query query = session.createQuery("from JobCounter where script_name = :script_name and jobRankNum =:jobRankNum");
+		query.setParameter("script_name", scriptName);
+		query.setParameter("jobRankNum", jobRankNum);
+		
+		List<JobCounter> list = (List<JobCounter>) query.list();
+		
+		session.getTransaction().commit();
+		session.close();
+		
+		return list;
+    }
+    
+    /**
+     * This method is used for retrieve data from AVGCounter in db
+     * @param tableName
+     * @param scriptName
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public List<AVGCounter> readAVGCounter(String scriptName, int jobRankNum){
+    	Session session = sessionFactory.openSession();
+		session.beginTransaction();
+		
+		Query query = session.createQuery("from AVGCounter where script_name = :script_name and jobRankNum =:jobRankNum");
+		query.setParameter("script_name", scriptName);
+		query.setParameter("jobRankNum", jobRankNum);
+		
+		List<AVGCounter> list = (List<AVGCounter>) query.list();
+		
+		session.getTransaction().commit();
+		session.close();
+		
+		return list;
+    }
+    
+    /**
+     * This method is used for updating AVGCounter in the db
+     * @param reduceNum
+     * @param mapCPUTime
+     * @param reduceCPUTime
+     * @param totalCPUTime
+     * @param mapElapsedTime
+     * @param reduceElapsedTime
+     * @param shufflePhaseTime
+     * @param sortPhaseTime
+     * @param reducePhaseTime
+     * @param shuffleBytes
+     */
+    @SuppressWarnings("unchecked")
+    public void updateAVGCounter(AVGCounter newCounter){
+    	
+    	Session session = sessionFactory.openSession();
+		session.beginTransaction();
+		Query query = session.createQuery("from AVGCounter where script_name = :script_name and reduceNum = :reduceNum and jobRankNum =:jobRankNum");
+		query.setParameter("script_name", newCounter.getName());
+		query.setParameter("reduceNum", newCounter.getReduceNum());
+		query.setParameter("jobRankNum", newCounter.getJobRankNum());
+		
+		List<AVGCounter> list = (List<AVGCounter>) query.list();
+		
+		if(list.isEmpty()){
+			insert(newCounter);
+		}else {
+			AVGCounter counter = list.get(0);
+			counter.setMapCPUTime((counter.getMapCPUTime() + newCounter.getMapCPUTime())/2);
+        	counter.setReduceCPUTime((counter.getReduceCPUTime() + newCounter.getReduceCPUTime())/2);
+        	counter.setTotalCPUTime(counter.getMapCPUTime() + counter.getReduceCPUTime());
+        	counter.setMapElapsedTime((counter.getMapElapsedTime() + newCounter.getMapElapsedTime())/2);
+        	counter.setReduceElapsedTime((counter.getReduceElapsedTime() + newCounter.getReduceElapsedTime())/2);
+        	counter.setShufflePhaseTime((counter.getShufflePhaseTime() + newCounter.getShufflePhaseTime())/2);
+        	counter.setSortPhaseTime((counter.getSortPhaseTime() + newCounter.getSortPhaseTime())/2);
+        	counter.setReducePhaseTime((counter.getReducePhaseTime() + newCounter.getReducePhaseTime())/2);
+        	counter.setShuffleBytes((counter.getShuffleBytes() + newCounter.getShuffleBytes())/2);
+        	session.saveOrUpdate(counter);
+        	session.getTransaction().commit();
+		}
+    	session.close();
+    }
     
     /**
      * This method is used for closing sessionFactory

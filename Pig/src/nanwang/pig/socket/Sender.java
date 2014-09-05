@@ -7,6 +7,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import nanwang.pig.entity.DbHandler;
+import nanwang.pig.utils.Tool;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,10 +22,13 @@ public class Sender {
 	private boolean completed = false;
 	private final int periodicTime = 900;
 	private final Client client;
+	private DbHandler dbHandler;
+	private String pigname;
+	private String scriptId;
 	
-	public Sender(Client client){
+	public Sender(Client client, DbHandler dbHandler){
 		this.client = client;
-		
+		this.dbHandler = dbHandler;
 		startTimer(timer);
 	}
 	
@@ -43,6 +47,7 @@ public class Sender {
 						if(root.get("notification").equals("success") && completed){
 							client.write(messages.poll() + "\n");
 							client.close();
+							dbHandler.insertOutput(scriptId, null, pigname, "Success", Tool.getCurrentTime());
 							DbHandler.close();
 							System.exit(1);
 						}else if(!root.get("notification").equals("success")){
@@ -77,5 +82,13 @@ public class Sender {
 	 */
 	public Client getClient(){
 		return client;
+	}
+	
+	public void setPigName(String name){
+		this.pigname = name;
+	}
+	
+	public void setPigScriptId(String id){
+		this.scriptId = id;
 	}
 }

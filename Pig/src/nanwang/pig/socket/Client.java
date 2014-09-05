@@ -1,9 +1,7 @@
 package nanwang.pig.socket;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -17,7 +15,6 @@ import java.net.UnknownHostException;
 public class Client{
 	
 	private Socket socket;
-	private BufferedReader br;
 	private static BufferedWriter bw;
 	
 	/**
@@ -29,21 +26,7 @@ public class Client{
 	 */
 	public Client(String ip, int port) throws UnknownHostException, IOException {
 		socket = new Socket(ip, port);
-		br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
-	}
-	
-	/**
-	 * This method is used for reading from socket
-	 * @return
-	 * @throws IOException
-	 */
-	public String read() throws IOException {
-		StringBuilder sb = new StringBuilder();
-        String line = null;
-        line = br.readLine();
-        sb.append(line);
-        return sb.toString();
 	}
 	
 	/**
@@ -61,7 +44,6 @@ public class Client{
 	 * @throws IOException
 	 */
 	public void close() throws IOException {
-		br.close();
 		bw.close();
 		socket.close();
 	}

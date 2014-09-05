@@ -26,5 +26,6 @@ echo "Install multipart module"
 #install multipart
 sudo apt-get install git
 cd ~/PigDebugger/node_modules
+rm -r multipart
 git clone https://github.com/isaacs/multipart-js.git
 mv multipart-js multipart
