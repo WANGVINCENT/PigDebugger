@@ -1,4 +1,4 @@
-var host = '146.169.44.203';
+var host = '146.169.44.198';
 var socket = io.connect('http://' + host + ':8080');
 var string = '';
 var output = '';
@@ -37,6 +37,7 @@ $('#killButton').attr('disabled', true);
 $('#explainButton').attr('disabled', false);
 $('#namenodeButton').attr('disabled', false);
 $('#jobtrackerButton').attr('disabled', false);
+$('#optimizationButton').attr('disabled', false);
 
 $('#namenodeiframe').attr('src', 'http://' + host + ':50070');
 $('#jobtrackeriframe').attr('src', 'http://' + host + ':50030');
@@ -165,7 +166,8 @@ function showToolTip(){
 		'#explainLogButton' : 'This Button enables you to show/hide the explainlog area',
 		'#searchform' : 'Search widget helps you find the specific pig script!',
 		'#progressBar' : 'Progress bar!',
-		'#success' : 'This indicates if the execution of the Pig script succeeds or fails!'
+		'#success' : 'This indicates if the execution of the Pig script succeeds or fails!',
+		'#JobChart': 'JobLineChart Button build line charts for multiple relations!'
 	}
 
 	for(var i in tip_array){
@@ -412,6 +414,13 @@ function coordinate(data){
         
         string += '</tr>';
         $('#stateLog').html(string);
+
+        $('#jobRankNumSelector').html('');
+        $('#jobRankNumSelector1').html('');
+        for(var i=1;i<=jobsNumber;i++){
+        	$('#jobRankNumSelector').append('<li><a onclick="setJobRankNum(' + i + ')">' + i + '</a></li>');
+        	$('#jobRankNumSelector1').append('<li><a onclick="setJobRankNum(' + i + ')">' + i + '</a></li>');
+        }
 	}else if(data.notification == 'launch'){
 		var aliasArray = data.alias.split('+');
 		for(var i in aliasArray){
@@ -473,6 +482,12 @@ socket.on('notification', function (data) {
 	}else if(type == 'explain'){
 		var tcpData = JSON.parse(data);
 		coordinate(tcpData);
+	}else if(type == 'optimize'){
+		var tcpData = JSON.parse(data);
+		$('#optimizeResult').html('The optimal reduce number is ' + tcpData.ReduceNum + '<br>' + 
+								  'The mapCPUTime is ' + tcpData.MapCPUTime + ' seconds<br>' + 
+								  'The reduceCPUTime is ' + tcpData.ReduceCPUTime + ' seconds<br>' +
+								  'The total CPUTime is ' + tcpData.TotalCPUTime + ' seconds<br>');
 	}
 });
 
@@ -633,6 +648,8 @@ function executeScript(){
 	reset();
 	kill = false;
 
+	$("#chartImg").attr("src", "");
+
 	//get the line number mapping to alias
 	var content = editor.getDoc().getValue();
 	var clauses = content.split(';');
@@ -677,6 +694,25 @@ function killScript(){
     }, delay); 
 }
 
+var chartType;
+var jobRankNum;
+function generateChart(){
+
+	jobRankNum = $('#jobRankNumText').text().trim();
+
+	if(selectedScript == ''){
+		alert('No script selected!');
+	}else if(jobRankNum == 'jobRankNum'){
+		alert('No jobRankNum selected!');
+	}else{
+		var data = {'name': selectedScript,
+					'jobRankNum' : jobRankNum
+			   	   };
+
+		socket.emit('generateChart', data);
+	}
+}
+
 //explain the specific alias
 function explainAlias(){
 	reset();
@@ -717,6 +753,8 @@ function reset(){
 	running = false;
 	jobsCount = 0;
 	kill = false;
+	chartType = "chartType";
+	jobRankNum = "jobRankNum";
 }
 
 //open state log
@@ -820,3 +858,41 @@ function helper(value){
 function setMode(mode){
 	$('#ModeText').html(mode + ' <span class="caret"></span>');
 }
+
+function setChartType(chartType){
+	$('#chartTypeText').html(chartType + ' <span class="caret"></span>');
+
+	$("#chartImg").attr("src", "");
+
+   	$("#chartImg").attr("src", "../charts/" + $('#chartTypeText').text().trim() + ".png");
+}
+
+function setJobRankNum(jobRankNum){
+	$('#jobRankNumText').html(jobRankNum + ' <span class="caret"></span>');
+}
+
+function resetChart(){
+	$('#chartImg').attr('src', '');
+}
+
+var jobRankNum1;
+function Optimize(){
+	jobRankNum1 = $('#jobRankNumText1').text().trim();
+	type = 'optimize';
+	if(selectedScript == ''){
+		alert('No script selected!');
+	}else{
+		var data = {'name': selectedScript,
+					'jobRankNum' : 1,
+					'PredictionFileSize' : $('#PredictionFileSize').val(),
+					'SampleFileSize' : $('#SampleFileSize').val(),
+					'SampleFileShuffleBytes' : $('#SampleFileShuffleBytes').val()
+			   	   };
+
+		socket.emit('optimize', data);
+	}
+
+}
+
+
+

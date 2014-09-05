@@ -55,6 +55,8 @@
         <mapping class="nanwang.pig.entity.Job"/>
         <mapping class="nanwang.pig.entity.Output"/>
         <mapping class="nanwang.pig.entity.MRPlan"/>
+        <mapping class="nanwang.pig.entity.JobCounter"/>
+        <mapping class="nanwang.pig.entity.AVGCounter"/>
 
     </session-factory>
 

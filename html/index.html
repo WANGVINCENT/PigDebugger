@@ -15,17 +15,31 @@
 			}
 
 			#namenodeDialog{
-				width: 96%;
+				width: 91%;
 				left: 24%;
 				height: 95%;
 				top:3%;
 			}
 
 			#jobtrackerDialog{
-				width: 96%;
+				width: 91%;
 				left: 24%;
 				height: 95%;
 				top:3%;
+			}
+
+			#jobChartDialog{
+				width: 50%;
+				left: 45%;
+				height: 95%;
+				top:3%;
+			}
+
+			#OptimizationDialog{
+				width: 50%;
+				left: 45%;
+				height: 40%;
+				top:20%;
 			}
 
 			.modal-body{
@@ -66,6 +80,8 @@
 	   			</table>
 	   		</div>
 
+	   		<button id="JobChart" class="btn btn-info" data-toggle="modal" href="#jobChartDialog">JobLineChart</button>
+	   		<button id="UDFButton" class="btn btn-primary" data-toggle="modal" href="#UDFDialog">Upload UDF</button>
 	   		<div id="UDFJar" class="btn-group">
 				<a class="btn btn-success dropdown-toggle" data-toggle="dropdown">
 				    UDFs
@@ -74,9 +90,8 @@
 				<ul id="udf" style="cursor: pointer;" class="dropdown-menu">
 				</ul>
 			</div>
-			<button id="UDFButton" class='btn btn-primary' data-toggle="modal" href="#UDFDialog">Upload UDF</button>
-	   		
-			<div id="parameter">
+			
+	   		<div id="parameter">
 		   		<div id="helper" class="btn-group">
 					<a class="btn btn-info dropdown-toggle" data-toggle="dropdown">
 					    Pig Helper
@@ -143,6 +158,72 @@
 				</div>
 			</div>
 
+			<div style="display: none;" id="jobChartDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="windowTitleLabel" aria-hidden="true">
+				<div class="modal-header">
+					<h3>JobChart</h3>
+					<div id="chartType" style="position:absolute;top:5%;left:10%;" class="btn-group">
+						<a id="chartTypeText" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+						    ChartType
+						    <span class="caret"></span>
+						</a>
+						<ul id="chartTypeSelector" style="cursor: pointer;" class="dropdown-menu">
+							<li><a onclick="setChartType(this.innerHTML)">ReduceCPUTime-ReduceNum</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">MapCPUTime-ReduceNum</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">MapElapsedTime-ReduceNum</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">ReduceElapsedTime-ReduceNum</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">ShuffleBytes-ReduceNum</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">ShufflePhaseTime-ReduceNum</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">SortPhaseTime-ReduceNum</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">ReducePhaseTime-ReduceNum</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">ReduceCPUTime-ShuffleBytes</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">ReduceElapsedTime-ShuffleBytes</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">TotalCPUTime-ReduceNum</a></li>
+							<li><a onclick="setChartType(this.innerHTML)">TotalCPUTime-ShuffleBytes</a></li>
+						</ul>
+					</div>
+					
+					<div id="jobRankNum" style="position:absolute;top:5%;left:50%;" class="btn-group">
+						<a id="jobRankNumText" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
+						    jobRankNum
+						    <span class="caret"></span>
+						</a>
+						<ul id="jobRankNumSelector" style="cursor: pointer;" class="dropdown-menu"></ul>
+					</div>
+
+					<button id="GenerateChart" style="position:absolute;top:5%;left:70%;" onclick="generateChart()" class="btn btn-success has-spinner active" type="submit">Generate Chart <i class="icon-upload icon-white"></i></button>
+					
+					<img id="chartImg" style="position:relative;top:5%;height:80%;" src="" />
+
+				</div>
+				<div class="modal-footer" style="position:relative;top:5%;">
+					<a class="btn btn-danger" onclick="$('#jobChartDialog').modal('hide');">Close</a>
+				</div>
+			</div>
+
+			<div style="display: none;" id="OptimizationDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="windowTitleLabel" aria-hidden="true">
+				<div class="modal-header">
+					<h3>Optimization</h3>
+				</div>
+				<div class="modal-body" style="overflow-y: hidden;">
+					<input id="PredictionFileSize" type="text" placeholder="PredictionFileSize(MB)" style="height:8%;"/>
+					<input id="SampleFileSize" type="text" placeholder="SampleFileSize(MB)" style="height:8%;"/>
+					<input id="SampleFileShuffleBytes" type="text" placeholder="SampleFileShuffleBytes(MB)" style="height:8%;"/>
+					<div id="jobRankNum1" class="btn-group">
+						<a id="jobRankNumText1" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
+						    jobRankNum
+						    <span class="caret"></span>
+						</a>
+						<ul id="jobRankNumSelector1" style="cursor: pointer;" class="dropdown-menu"></ul>
+					</div>
+					
+					<div id="optimizeResult" style="height:30%;"></div>
+				</div>
+				<div class="modal-footer" style="position:relative;top:5%;">
+					<a class="btn btn-success" id="Optimize" onclick="Optimize()">Optimize-Predict</a>
+					<a class="btn btn-danger" onclick="$('#OptimizationDialog').modal('hide');">Close</a>
+				</div>
+			</div>
+
 			<div id="buttongroup1">
 				<button class="btn btn-success" id="executeButton" onclick="executeScript()">Execute <i class="icon-play-circle icon-white"></i></button>
 				<button class="btn btn-danger" id="killButton" onclick="killScript()">Kill <i class="icon-stop icon-white"></i></button>
@@ -158,6 +239,8 @@
 	   			<button class="btn btn-success" id="createScriptButton" onclick="createScript()">New <i class="icon-plus-sign icon-white"></i></button>
 	   			<button class="btn btn-primary" id="saveScriptButton" onclick="saveScript()">Save <i class="icon-hdd icon-white"></i></button>
 	   			<button class="btn btn-danger" id="resetinputButton" onclick="resetScript()">Reset script <i class="icon-repeat icon-white"></i></button>
+				<button class="btn btn-info" id="optimizationButton" data-toggle="modal" href="#OptimizationDialog">Optimization</button>
+
 				<textarea id="scriptinputarea" style="word-break:break-all;"></textarea>
 		   		<div id="progressBar" class="progress progress-striped active">
 					<div id="progression" class="bar" style="width:0%;font-style:normal;font-size:100%;">0%</div>

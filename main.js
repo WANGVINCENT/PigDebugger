@@ -40,7 +40,6 @@ var pool =  mysql.createPool({
 });	
 
 createDatabase(db_name);
-createTable('users');
 
 /*
 *******************************************************TCP SERVER*************************************************
@@ -284,7 +283,7 @@ io.sockets.on('connection', function (socket) {
     	httpSocket = socket;
 
     	var executionString = '';
-    	executionString = 'java -Xmx512m -Xms256m -cp ' + __dirname + '/bin';
+    	executionString = 'java -Xmx800m -Xms500m -cp ' + __dirname + '/bin';
     	executionString += ':' + __dirname + '/bin/hibernate/*';
     	if(data.mode == 'mapreduce'){
     		executionString += ':$HADOOPDIR';
@@ -298,8 +297,38 @@ io.sockets.on('connection', function (socket) {
     	executionString += __dirname + '/pig.properties';
     	console.log(executionString);
     	sys.debug('Execute the script!');
+    	
     	exec = process.exec(executionString, puts);
     });
+
+    socket.on('generateChart', function(data){
+    	var executionString = '';
+    	executionString = 'java -Xmx800m -Xms500m -cp ' + __dirname + '/bin';
+    	executionString += ':' + __dirname + '/bin/hibernate/*';
+    	executionString += ':' + __dirname + '/bin/jfreechart/*';
+    	executionString += ' LineChart'; 
+    	executionString += ' ' + data.name + '.pig';
+    	executionString += ' ' + data.jobRankNum;
+    	console.log(executionString);
+    	exec = process.exec(executionString, puts);
+	});
+
+	socket.on('optimize', function(data){
+		httpSocket = socket;
+		var executionString = '';
+    	executionString = 'java -Xmx800m -Xms500m -cp ' + __dirname + '/bin';
+    	executionString += ':' + __dirname + '/bin/hibernate/*';
+    	executionString += ' Optimization'; 
+    	executionString += ' ' + data.name + '.pig';
+    	executionString += ' ' + data.jobRankNum;
+    	executionString += ' ' + data.PredictionFileSize;
+    	executionString += ' ' + data.SampleFileSize;
+    	executionString += ' ' + data.SampleFileShuffleBytes;
+    	executionString += ' ' + host;
+    	executionString += ' ' + tcpPort;
+		console.log(executionString);
+    	exec = process.exec(executionString, puts);
+	});
 
     //kill pig process
     socket.on('kill', function(data){
